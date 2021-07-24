@@ -1,0 +1,293 @@
+// default.dbj gets executed upon gamejoin
+js_strict(true);
+
+include("json2.js");
+include("NTItemParser.dbl");
+include("OOG.js");
+include("AutoMule.js");
+include("Gambling.js");
+include("CraftingSystem.js");
+include("TorchSystem.js");
+include("MuleLogger.js");
+include("common/Attack.js");
+include("common/Cubing.js");
+include("common/CollMap.js");
+include("common/Config.js");
+include("common/Loader.js");
+include("common/Misc.js");
+include("common/Pickit.js");
+include("common/Pather.js");
+include("common/Precast.js");
+include("common/Prototypes.js");
+include("common/Runewords.js");
+include("common/Storage.js");
+include("common/Town.js");
+include("private-server/Functions/Color.js"); //导入颜色对象，用于解决编码不支持造成的console颜色问题
+
+function main() {
+	var receivedRealm = false;
+
+	D2Bot.init(); // Get D2Bot# handle
+	D2Bot.ingame();
+
+	// wait until game is ready
+	while (!me.gameReady) {
+		delay(50);
+	}
+
+	if (!getScript("tools/heartbeat.js")) {
+		load("tools/heartbeat.js");
+	}
+
+	if (getScript("D2BotMap.dbj") || getScript("D2BotMapPrivateServer.dbj")) { //加入私服入口文件判断
+		load("tools/mapthread.js");
+		load("tools/ToolsThread.js");
+
+		// addEventListener("scriptmsg", function (msg) {
+		// 	if (msg.indexOf("type") > -1) { //如果消息包含type(townMode)，则将townMode存入城镇地图信息
+		// 		while (!me.act) {
+		// 			delay(500);
+		// 		}
+		// 		Town.act[me.act - 1].townMode = msg;
+		// 		print("defaultReceived");
+		// 	}
+		// });
+
+		while (true) {
+			delay(1000);
+		}
+	}
+
+	// don't load default for mules
+	if (getScript("D2BotMule.dbj") || getScript("D2BotMulePrivateServer.dbj")) {  //加入私服入口文件判断，仓库不载入deafult
+		return true;
+	}
+
+	// MuleLogger handler
+	if (MuleLogger.inGameCheck()) {
+		return true;
+	}
+
+	var i, sojPause, stats, anni,
+		sojCounter = 0,
+		startTime = getTickCount();
+
+	this.itemEvent = function (gid, mode, code, global) {
+		if (gid > 0 && mode === 0) {
+			Pickit.gidList.push(gid);
+		}
+	};
+
+	this.scriptEvent = function (msg) {
+		switch (msg) {
+			case "soj":
+				sojPause = true;
+				sojCounter = 0;
+
+				break;
+			case "receivedRealm":
+				receivedRealm = true;
+
+				break;
+		}
+
+		if (msg.indexOf("type") > -1) { //如果消息包含type(townMode)，则将townMode存入城镇地图信息
+			while (!me.act) {
+				delay(500);
+			}
+			Town.act[me.act - 1].townMode = msg;
+			//print("defaultReceived");
+		}
+
+	};
+
+	this.copyDataEvent = function (mode, msg) {
+		if (mode === 0 && msg === "mule") { // "Mule Profile" option from D2Bot#
+			if (AutoMule.getInfo() && AutoMule.getInfo().hasOwnProperty("muleInfo")) {
+				if (AutoMule.getMuleItems().length > 0) {
+					D2Bot.printToConsole("Mule triggered");
+					scriptBroadcast("mule");
+					while (!receivedRealm) {
+						delay(500); //等待直到线程收到目标国度再退游戏
+					}
+					scriptBroadcast("quit");
+				} else {
+					D2Bot.printToConsole("No items to mule.");
+				}
+			} else {
+				D2Bot.printToConsole("Profile not enabled for muling.");
+			}
+		}
+	};
+
+	// Initialize libs - load config variables, build pickit list, attacks, containers and cubing and runeword recipes
+	Config.init(true);
+	Pickit.init(true);
+	Attack.init();
+	Storage.Init();
+	CraftingSystem.buildLists();
+	Runewords.init();
+	Cubing.init();
+
+	addEventListener("scriptmsg", this.scriptEvent);  //转仓需要监听MF国度（receivedRealm），置前
+
+	// AutoMule handler
+	if (AutoMule.inGameCheck()) { //转仓丢东西
+		//完成转仓后
+		if (getScript("D2BotLeadPrivateServer.dbj") || getScript("D2BotFollowPrivateServer.dbj")) { //加入私服入口文件判断
+			scriptBroadcast("muleDone");
+			while (!receivedRealm) {
+				delay(500); //等待直到线程收到目标国度再退游戏
+			}
+		}
+		return true;
+	}
+
+	// TorchSystem handler
+	if (TorchSystem.inGameCheck()) {
+		return true;
+	}
+
+	// Gambling System handler
+	if (Gambling.inGameCheck()) {
+		return true;
+	}
+
+	// Crafting System handler
+	if (CraftingSystem.inGameCheck()) {
+		return true;
+	}
+
+	me.maxgametime = Config.MaxGameTime * 1000;
+	stats = DataFile.getStats();
+
+	// Check for experience decrease -> log death. Skip report if life chicken is disabled.
+	if (stats.name === me.name && me.getStat(13) < stats.experience && Config.LifeChicken > 0) {
+		D2Bot.printToConsole("You died in last game", 9);
+		D2Bot.printToConsole("Experience decreased by " + (stats.experience - me.getStat(13)), 9);
+		DataFile.updateStats("deaths");
+		D2Bot.updateDeaths();
+	}
+
+	DataFile.updateStats(["experience", "name"]);
+
+	// Load events and threads
+	addEventListener("copydata", this.copyDataEvent);
+	//addEventListener("scriptmsg", this.scriptEvent);  //转仓需要监听目标国度（receivedRealm），置前
+
+	load("tools/ToolsThread.js");
+
+	if (Config.TownCheck || Config.TownHP || Config.TownMP) {
+		load("libs/private-server/tools/TownChicken.js"); //仅增加townMode监听，不影响其他入口文件使用
+	}
+
+	if (Config.PublicMode) {
+		load("tools/Party.js");
+	}
+
+	if (Config.AntiHostile) {
+		load("tools/AntiHostile.js");
+	}
+
+	if (Config.FastPick) {
+		print(Color.lgreen + "Fast pickit active."); //浅绿色
+		addEventListener("itemaction", this.itemEvent);
+	}
+
+	// One time maintenance - get corpse, clear leftover items, pick items in case anything important was dropped
+	if (!Scripts.UserAddon && !Scripts.Test) {
+		Town.getCorpse();
+		Town.clearBelt();
+		Town.clearInventory();
+		//Pickit.pickItems();
+	}
+
+	me.automap = Config.AutoMap;
+
+	// Next game = drop keys
+	if (TorchSystem.keyCheck()) {
+		scriptBroadcast("torch");
+	}
+
+	// 导入脚本
+	if (getScript("D2BotLeadPrivateServer.dbj") || getScript("D2BotFollowPrivateServer.dbj")) { //加入私服入口文件判断
+		if (!isIncluded("private-server/Functions/Globals.js")) { //导入Globals(SetUp类)
+			include("private-server/Functions/Globals.js");
+			SetUp.include(); //导入所有私服函数(重写类)
+		}
+	}
+
+	// Go
+	Loader.init();
+
+	if (Config.MinGameTime && getTickCount() - startTime < Config.MinGameTime * 1000) {
+		try {
+			Town.goToTown();
+
+			while (getTickCount() - startTime < Config.MinGameTime * 1000) {
+				me.overhead("Stalling for " + Math.round(((startTime + (Config.MinGameTime * 1000)) - getTickCount()) / 1000) + " Seconds");
+				delay(1000);
+			}
+		} catch (e1) {
+			print(e1);
+		}
+	}
+
+	DataFile.updateStats("gold");
+
+	if (sojPause) {
+		try {
+			Town.goToTown();
+			Town.doChores();
+
+			me.maxgametime = 0;
+
+			while (sojCounter < Config.SoJWaitTime) {
+				me.overhead("Waiting for SoJ sales... " + (Config.SoJWaitTime - sojCounter) + " min");
+				delay(6e4);
+
+				sojCounter += 1;
+			}
+		} catch (e2) {
+			print(e2);
+		}
+	}
+
+	if (Config.LastMessage) {
+		switch (typeof Config.LastMessage) {
+			case "string":
+				say(Config.LastMessage.replace("$nextgame", DataFile.getStats().nextGame, "i"));
+
+				break;
+			case "object":
+				for (i = 0; i < Config.LastMessage.length; i += 1) {
+					say(Config.LastMessage[i].replace("$nextgame", DataFile.getStats().nextGame, "i"));
+				}
+
+				break;
+		}
+	}
+
+	if (AutoMule.muleCheck()) {
+		scriptBroadcast("mule");
+	}
+
+	// Anni handler. Mule Anni if it's in unlocked space and profile is set to mule torch/anni.
+	anni = me.findItem(603, 0, -1, 7);
+
+	if (anni && !Storage.Inventory.IsLocked(anni, Config.Inventory) && AutoMule.getInfo() && AutoMule.getInfo().hasOwnProperty("torchMuleInfo")) {
+		scriptBroadcast("muleAnni");
+	}
+
+	if (CraftingSystem.checkFullSets()) {
+		scriptBroadcast("crafting");
+	}
+
+	if (TorchSystem.keyCheck()) {
+		scriptBroadcast("torch");
+	}
+
+	scriptBroadcast("quit");
+
+	return true;
+}
