@@ -13,6 +13,8 @@ function main() {
 
     D2Bot.init();
 
+    var needCheck = true; //是否需要检查城镇地图类型（该私服城内是否有路障）
+
     var packetlist = []; //封包数组
 
     /*
@@ -79,6 +81,8 @@ function main() {
 
         //写完townMode之后 告诉游戏线程和吃鸡线程TownMode
         this.shareTownMode(townMode);
+
+        print("TownMode: " + townMode);
         return true;
     };
 
@@ -86,7 +90,7 @@ function main() {
         Messaging.sendToScript("default.dbj", townMode);
         Messaging.sendToScript("libs/private-server/tools/TownChicken.js", townMode);
         return true;
-    }
+    };
 
     this.readTownMode = function () {
         var file, fileLength, filePath, gameTownModes;
@@ -111,7 +115,7 @@ function main() {
         }
 
         return false;
-    }
+    };
 
     this.writeTownMode = function (townMode) {
         var file, fileLength, filePath,
@@ -154,7 +158,7 @@ function main() {
         }
 
         return false;
-    }
+    };
 
     this.changeFile = function (gameTownModes, townMode) {
         var fileMsg, filePath = "libs/private-server/data/GameTownModes.json";
@@ -163,7 +167,7 @@ function main() {
         Misc.fileAction(filePath, 1, fileMsg);
 
         return true;
-    }
+    };
 
     /*
         比较2个数组中的对象，返回相同的数量
@@ -180,7 +184,7 @@ function main() {
             }
         }
         return sameNo;
-    }
+    };
 
     /*
         去除数组中的重复对象
@@ -200,7 +204,7 @@ function main() {
         }
 
         return array;
-    }
+    };
 
     /*
         转换封包数据
@@ -240,6 +244,10 @@ function main() {
     print(Color.orange + "TownModeChecker" + Color.white + " :: loaded.");
 
     //需要改写pather的usewaypoint和useportal，如果目标在城内, 提前开启封包收集;
+
+    if (!needCheck) {
+        return true; //如果不需要检测城镇地图类型则直接结束线程
+    }
 
     //开始主循环
     while (true) {

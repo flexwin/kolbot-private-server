@@ -2,7 +2,7 @@ var StarterConfig = {
 	MinGameTime: 0, // Minimum game length in seconds. If a game is ended too soon, the rest of the time is waited in the lobby
 	PingQuitDelay: 30, // Time in seconds to wait in lobby after quitting due to high ping
 	CreateGameDelay: 0, // Seconds to wait before creating a new game
-	ResetCount: 101, // Reset game count back to 1 every X games.
+	ResetCount: 20, // Reset game count back to 1 every X games.
 	CharacterDifference: 99, // Character level difference. Set to false to disable character difference.
 	ChatActionsDelay: 2, // Seconds to wait in lobby before entering a channel
 
@@ -73,6 +73,7 @@ include("craftingsystem.js");
 include("torchsystem.js");
 include("common/misc.js");
 include("private-server/functions/Color.js"); //引入颜色对象，解决编码不兼容导致的console显色问题
+
 
 if (!FileTools.exists("data/" + me.profile + ".json")) {
 	DataFile.create();
@@ -205,6 +206,8 @@ function dbjPause() {
 			}
 		}
 	}
+
+	return true;
 }
 
 function changeRealm(targetRealm) {

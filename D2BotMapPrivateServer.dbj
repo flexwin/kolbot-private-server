@@ -43,8 +43,9 @@ function main() {
 	delay(500);
 	D2Bot.init();
 	load("tools/heartbeat.js");
-	//load("libs/private-server/tools/TownModeHelper.js");
-	load("libs/private-server/tools/TownModeChecker.js");
+	load("libs/private-server/tools/TownModeHelper.js");
+	//load("libs/private-server/tools/TownModeChecker.js");
+
 	while (true) {
 		if (me.gameReady) {
 			if (isUp === "no") {

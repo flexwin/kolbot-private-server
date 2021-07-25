@@ -150,7 +150,7 @@ function main() {
         print("removed: " + (startLength - array.length));
 
         return array;
-    }
+    };
 
     /*
         转换封包数据

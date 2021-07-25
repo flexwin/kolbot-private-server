@@ -1,3 +1,5 @@
+Town.existBarriers = true; //私服是否有路障（是否使用自定义路线）
+
 Town.getNearestTownSpot = function () {
     var i, name, townSpot, distance,
         townSpots = this.act[me.act - 1].spot,
@@ -15,7 +17,7 @@ Town.getNearestTownSpot = function () {
     }
 
     return name;
-}
+};
 
 Town.moveToSpot = function (spot) {
     var i, path, townSpot,
@@ -45,8 +47,9 @@ Town.moveToSpot = function (spot) {
 
         if (getDistance(me, townSpot[i], townSpot[i + 1]) > 2) {
             path = this.getPath(spot);
-            if (path) {
+            if (this.existBarriers && path) {
                 this.followPath(path);
+                Pather.moveTo(townSpot[i], townSpot[i + 1], 3, false, false);
             } else {
                 Pather.moveTo(townSpot[i], townSpot[i + 1], 3, false, true);
             }
@@ -94,7 +97,7 @@ Town.moveToSpot = function (spot) {
     }
 
     return false;
-}
+};
 
 Town.followPath = function (path) {
     /*
@@ -126,10 +129,10 @@ Town.followPath = function (path) {
     }
 
     return true;
-}
+};
 
 Town.openChests = function (range, times) {
-    var unit,
+    var i, unit,
         unitList = [],
         containers = [
             "chest", "loose rock", "hidden stash", "loose boulder", "corpseonstick", "casket", "armorstand", "weaponrack", "barrel", "holeanim", "tomb2",
@@ -148,29 +151,70 @@ Town.openChests = function (range, times) {
 
     if (unit) {
         do {
-            if (this.validChest(unit.x, unit.y) &&
-                unit.name && unit.mode === 0 && getDistance(me.x, me.y, unit.x, unit.y) <= range && containers.indexOf(unit.name.toLowerCase()) > -1) {
+            if (unit.name && unit.mode === 0 && getDistance(me.x, me.y, unit.x, unit.y) <= range && containers.indexOf(unit.name.toLowerCase()) > -1
+                && this.validChest(unit.classid, unit.x, unit.y)) {
                 unitList.push(copyUnit(unit));
             }
         } while (unit.getNext());
     }
 
-    while (times > 0) {
+    print(unitList.length);
+
+    while (times > 0 && unitList.length > 0) {
         unitList.sort(Sort.units);
 
         unit = unitList.shift();
 
-        times--;
-
-        if (unit && (Pather.useTeleport || !checkCollision(me, unit, 0x4)) && Misc.openChest(unit)) {
+        if (unit && (Pather.useTeleport || !checkCollision(me, unit, 0x4)) && this.openChest(unit)) {
             //Pickit.pickItems();
         }
+
+        times--;
     }
 
     return true;
-}
+};
 
-Town.validChest = function (x, y) {
+// Open a chest Unit
+Town.openChest = function (unit) {
+    // Skip invalid and Countess chests
+    if (!unit || unit.x === 12526 || unit.x === 12565) {
+        return false;
+    }
+
+    // already open
+    if (unit.mode) {
+        return true;
+    }
+
+    // locked chest, no keys
+    if (me.classid !== 6 && unit.islocked && !me.findItem(543, 0, 3)) {
+        return false;
+    }
+
+    var i, tick;
+
+    for (i = 0; i < 3; i += 1) {
+        sendPacket(1, 0x13, 4, unit.type, 4, unit.gid);
+        tick = getTickCount();
+
+        while (getTickCount() - tick < 1000) {
+            if (unit.mode) {
+                return true;
+            }
+
+            delay(10);
+        }
+    }
+
+    if (!me.idle) {
+        Misc.click(0, 0, me.x, me.y); // Click to stop walking in case we got stuck
+    }
+
+    return false;
+};
+
+Town.validChest = function (classid, x, y) {
     var i, objectList,
         fire, fireUnit,
         filePath = "libs/private-server/data/TownModes.json",
@@ -198,14 +242,16 @@ Town.validChest = function (x, y) {
     //             },
     objectList = townModes["act" + me.act][townMode.substring(4, 5) - 1];
 
+    //print(objectList.length);
+
     for (i = 0; i < objectList.length; i++) {
-        if (objectList[i].x === x && objectList[i].y === y) {
-            return (!objectList[i].repeat || objectList[i].repeat < 10) ? true : false;
+        if (objectList[i].classId === classid && objectList[i].x == x && objectList[i].y == y && objectList[i].repeat && objectList[i].repeat > 10) { //筛选掉重复路障
+            return false;
         }
     }
 
-    return false;
-}
+    return true;
+};
 
 Town.getPath = function (spot) {
     var i, typePathes,
@@ -225,471 +271,133 @@ Town.getPath = function (spot) {
     }
 
     return false;
-}
+};
 
-Town.pathes = {
-    act1: {
-        /**
-        *	@示例 myspot为起点，spot为终点，x,y为路线节点相对火堆的坐标，breakBarrier为此节点踢捅次数，如不需踢则可以不写
-        	
-            //地图类型：type1
-            type1: [
-                //所有地方去小站 [fire+27, fire-40]
-                {
-                    from: ["stash", "warriv", "cain", NPC.Kashya, NPC.Akara, NPC.Charsi, NPC.Gheed, "portalspot"],
-                    to: ["waypoint"],
-                    path: [
-                        {
-                            x: 27,
-                            y: - 36,
-                        },
-                        {
-                            x: 27,
-                            y: - 40,
-                            breakBarrier: 6
-                        }
-                    ]
-                },
-                //所有地方去出口（除了小站）
-                {
-                    from: ["stash", "warriv", "cain", NPC.Kashya, NPC.Akara, NPC.Charsi, NPC.Gheed, "portalspot"],
-                    to: ["exit"],
-                    path: [
-                        {
-                            x: 82,
-                            y: 0,
-                            breakBarrier: 3
-                        }
-                    ]
-                },
-            ],
-    
-            type2: [ ...
-        */
+include("private-server/data/TownPathes.js"); //导入自定义路线
 
-        //地图类型：出口左上
-        type1: [
-            //所有地方去小站 [fire+27, fire-40]
-            {
-                from: ["stash", "warriv", "cain", NPC.Kashya, NPC.Akara, NPC.Charsi, NPC.Gheed, "portalspot"],
-                to: ["waypoint"],
-                path: [
-                    {
-                        x: 27,
-                        y: - 40,
-                        breakBarrier: 6
-                    }
-                ]
-            },
-            //小站去所有地方[fire+22, fire-38]
-            {
-                from: ["waypoint"],
-                to: ["stash", "warriv", "cain", NPC.Kashya, NPC.Akara, NPC.Charsi, NPC.Gheed, "portalspot"],
-                path: [
-                    {
-                        x: 22,
-                        y: - 38,
-                        breakBarrier: 6
-                    },
-                    {
-                        x: 27,
-                        y: - 40
-                    }
-                ]
+/*
+    私服禁用城内TK
+*/
+Town.telekinesis = false;
+
+/*
+    重写initNPC函数 用于解决城内绕路踢桶问题
+*/
+Town.initNPC = function (task, reason) {
+    print("initNPC: " + reason);
+
+    var npc = getInteractedNPC();
+
+    if (npc && npc.name.toLowerCase() !== this.tasks[me.act - 1][task]) {
+        me.cancel();
+
+        npc = null;
+    }
+
+    // Jamella gamble fix
+    if (task === "Gamble" && npc && npc.name.toLowerCase() === NPC.Jamella) {
+        me.cancel();
+
+        npc = null;
+    }
+
+    /*
+    if (!npc) {
+        npc = getUnit(1, this.tasks[me.act - 1][task]);
+
+        if (!npc) {
+            this.move(this.tasks[me.act - 1][task]);
+
+            npc = getUnit(1, this.tasks[me.act - 1][task]);
+        }
+    }
+    */
+
+    if (!npc) {
+        this.move(this.tasks[me.act - 1][task]);
+
+        npc = getUnit(1, this.tasks[me.act - 1][task]);
+    }
+
+    if (!npc || npc.area !== me.area || (!getUIFlag(0x08) && !npc.openMenu())) {
+        return false;
+    }
+
+    switch (task) {
+        case "Shop":
+        case "Repair":
+        case "Gamble":
+            if (!getUIFlag(0x0C) && !npc.startTrade(task)) {
+                return false;
             }
-        ],
 
-        //地图类型：出口右下
-        type2: [
-            //所有地方去小站 [fire+26, fire-25]	
-            {
-                from: ["stash", "warriv", "cain", NPC.Kashya, NPC.Akara, NPC.Charsi, NPC.Gheed, "portalspot"],
-                to: ["waypoint"],
-                path: [
-                    {
-                        x: 26,
-                        y: - 25,
-                        breakBarrier: 4
-                    }
-                ]
-            },
-            //小站去所有地方 [fire+24, fire-28]
-            {
-                from: ["waypoint"],
-                to: ["stash", "warriv", "cain", NPC.Kashya, NPC.Akara, NPC.Charsi, NPC.Gheed, "portalspot"],
-                path: [
-                    {
-                        x: 24,
-                        y: - 28,
-                        breakBarrier: 4
-                    },
-                    {
-                        x: 26,
-                        y: - 25
-                    }
-                ]
-            },
-            //所有地方去出口
-            {
-                from: ["stash", "warriv", "cain", NPC.Kashya, NPC.Akara, NPC.Charsi, NPC.Gheed, "portalspot"],
-                to: ["exit"],
-                path: [
-                    {
-                        x: 82,
-                        y: 0,
-                        breakBarrier: 3
-                    }
-                ]
-            },
-            //小站去出口
-            {
-                from: ["waypoint"],
-                to: ["exit"],
-                path: [
-                    {
-                        x: 24,
-                        y: - 28,
-                        breakBarrier: 4
-                    },
-                    {
-                        x: 26,
-                        y: - 25
-                    },
-                    {
-                        x: 82,
-                        y: 0,
-                        breakBarrier: 3
-                    }
-                ]
-            },
-        ],
-
-        //地图类型：出口左下，封传送门
-        type3: [
-            //所有地方去小站(除了传送门) [fire-21, fire-34]
-            {
-                from: ["stash", "warriv", "cain", NPC.Kashya, NPC.Akara, NPC.Charsi, NPC.Gheed],
-                to: ["waypoint"],
-                path: [
-                    {
-                        x: - 21,
-                        y: - 34,
-                        breakBarrier: 4
-                    }
-                ]
-            },
-            //小站去所有地方(除了传送门) [fire-22, fire-39]  [fire-21, fire-30] 
-            {
-                from: ["waypoint"],
-                to: ["stash", "warriv", "cain", NPC.Kashya, NPC.Akara, NPC.Charsi, NPC.Gheed],
-                path: [
-                    {
-                        x: 22,
-                        y: - 29,
-                        breakBarrier: 4
-                    },
-                    {
-                        x: 24,
-                        y: - 24
-                    }
-                ]
-            },
-            //所有地方去传送门(除了小站)  [fire+12, fire+11] 
-            {
-                from: ["stash", "warriv", "cain", NPC.Kashya, NPC.Akara, NPC.Charsi, NPC.Gheed],
-                to: ["portalspot"],
-                path: [
-                    {
-                        x: 12,
-                        y: 11,
-                        breakBarrier: 3
-                    }
-                ]
-            },
-            //传送门去所有地方(除了小站) [fire+15, fire+18] [fire+12, fire+11] 
-            {
-                from: ["portalspot"],
-                to: ["stash", "warriv", "cain", NPC.Kashya, NPC.Akara, NPC.Charsi, NPC.Gheed],
-                path: [
-                    {
-                        x: 15,
-                        y: 18,
-                        breakBarrier: 3
-                    },
-                    {
-                        x: 12,
-                        y: 11
-                    }
-                ]
-            },
-            //传送门去小站
-            {
-                from: ["portalspot"],
-                to: ["waypoint"],
-                path: [
-                    {
-                        x: 15,
-                        y: 18,
-                        breakBarrier: 3
-                    },
-                    {
-                        x: 12,
-                        y: 11
-                    },
-                    {
-                        x: - 21,
-                        y: - 34,
-                        breakBarrier: 4
-                    }
-                ]
-            },
-            //小站去传送门
-            {
-                from: ["waypoint"],
-                to: ["portalspot"],
-                path: [
-                    {
-                        x: 22,
-                        y: - 29,
-                        breakBarrier: 4
-                    },
-                    {
-                        x: 24,
-                        y: - 24
-                    },
-                    {
-                        x: 12,
-                        y: 11,
-                        breakBarrier: 3
-                    }
-                ]
+            break;
+        case "Key":
+            if (!getUIFlag(0x0C) && !npc.startTrade(me.act === 3 ? "Repair" : "Shop")) {
+                return false;
             }
-        ],
 
-        //地图类型：出口右上，封阿卡拉
-        type4: [
-            //所有地方去小站(除了阿卡拉) 
-            {
-                from: ["stash", "warriv", "cain", NPC.Kashya, NPC.Charsi, NPC.Gheed, "portalspot"],
-                to: ["waypoint"],
-                path: [
-                    {
-                        x: - 24,
-                        y: - 32,
-                        breakBarrier: 4
-                    }
-                ]
-            },
-            //小站去所有地方(除了阿卡拉) 
-            {
-                from: ["waypoint"],
-                to: ["stash", "warriv", "cain", NPC.Kashya, NPC.Charsi, NPC.Gheed, "portalspot"],
-                path: [
-                    {
-                        x: - 29,
-                        y: - 35,
-                        breakBarrier: 4
-                    },
-                    {
-                        x: - 24,
-                        y: - 32
-                    }
-                ]
-            },
-            //所有地方去阿卡拉(除了小站)  [fire+47, fire-26]
-            {
-                from: ["stash", "warriv", "cain", NPC.Kashya, NPC.Charsi, NPC.Gheed, "portalspot"],
-                to: [NPC.Akara],
-                path: [
-                    {
-                        x: 48,
-                        y: - 27,
-                        breakBarrier: 4
-                    }
-                ]
-            },
-            //阿卡拉去所有地方(除了小站)  [fire+15, fire-52]
-            {
-                from: [NPC.Akara],
-                to: ["stash", "warriv", "cain", NPC.Kashya, NPC.Charsi, NPC.Gheed, "portalspot"],
-                path: [
-                    {
-                        x: 15,
-                        y: - 52
-                    }
-                ]
-            },
-            //阿卡拉去小站
-            {
-                from: [NPC.Akara],
-                to: ["waypoint"],
-                path: [
-                    {
-                        x: 15,
-                        y: - 52
-                    },
-                    {
-                        x: - 24,
-                        y: - 32,
-                        breakBarrier: 4
-                    }
-                ]
-            },
-            //小站去阿卡拉
-            {
-                from: ["waypoint"],
-                to: [NPC.Akara],
-                path: [
-                    {
-                        x: - 29,
-                        y: - 35,
-                        breakBarrier: 4
-                    },
-                    {
-                        x: - 24,
-                        y: - 32
-                    },
-                    {
-                        x: 48,
-                        y: - 27,
-                        breakBarrier: 4
-                    }
-                ]
-            }
-        ],
+            break;
+        case "CainID":
+            Misc.useMenu(0x0FB4);
+            me.cancel();
 
-        //地图类型：出口左下，封阿卡拉
-        type5: [
-            //所有地方去小站(除了阿卡拉) [fire-11, fire-34]
-            {
-                from: ["stash", "warriv", "cain", NPC.Kashya, NPC.Charsi, NPC.Gheed, "portalspot"],
-                to: ["waypoint"],
-                path: [
-                    {
-                        x: - 11,
-                        y: - 34,
-                        breakBarrier: 4
-                    }
-                ]
-            },
-            //小站去所有地方(除了阿卡拉) [fire-7, fire-35]
-            {
-                from: ["waypoint"],
-                to: ["stash", "warriv", "cain", NPC.Kashya, NPC.Charsi, NPC.Gheed, "portalspot"],
-                path: [
-                    {
-                        x: - 7,
-                        y: - 35,
-                        breakBarrier: 4
-                    },
-                    {
-                        x: - 11,
-                        y: - 34
-                    }
-                ]
-            },
-            //所有地方去阿卡拉(除了小站)  [fire+47, fire-26] 
-            {
-                from: ["stash", "warriv", "cain", NPC.Kashya, NPC.Charsi, NPC.Gheed, "portalspot"],
-                to: [NPC.Akara],
-                path: [
-                    {
-                        x: 38,
-                        y: - 19,
-                        breakBarrier: 4
-                    }
-                ]
-            },
-            //阿卡拉去所有地方(除了小站)  [fire+15, fire-52]
-            {
-                from: [NPC.Akara],
-                to: ["stash", "warriv", "cain", NPC.Kashya, NPC.Charsi, NPC.Gheed, "portalspot"],
-                path: [
-                    {
-                        x: 35,
-                        y: - 25,
-                        breakBarrier: 4  //踢捅以防万一传送门开在了阿卡拉身边
-                    },
-                    {
-                        x: 38,
-                        y: - 19
-                    }
-                ]
-            },
-            //阿卡拉去小站
-            {
-                from: [NPC.Akara],
-                to: ["waypoint"],
-                path: [
-                    {
-                        x: 35,
-                        y: - 25,
-                        breakBarrier: 4 //踢捅以防万一传送门开在了阿卡拉身边
-                    },
-                    {
-                        x: 38,
-                        y: - 19
-                    },
-                    {
-                        x: - 11,
-                        y: - 34,
-                        breakBarrier: 4
-                    }
-                ]
-            },
-            //小站去阿卡拉
-            {
-                from: ["waypoint"],
-                to: [NPC.Akara],
-                path: [
-                    {
-                        x: - 7,
-                        y: - 35,
-                        breakBarrier: 4
-                    },
-                    {
-                        x: - 11,
-                        y: - 34
-                    },
-                    {
-                        x: 38,
-                        y: - 19,
-                        breakBarrier: 4
-                    }
-                ]
-            }
-        ],
+            break;
+    }
 
-        //地图类型：出口右上 不封阿卡拉
-        type6: [
-            //所有地方去小站 [fire-24, fire-32]
-            {
-                from: ["stash", "warriv", "cain", NPC.Kashya, NPC.Akara, NPC.Charsi, NPC.Gheed, "portalspot", "waypoint"],
-                to: ["waypoint"],
-                path: [
-                    {
-                        x: - 24,
-                        y: - 32,
-                        breakBarrier: 4
-                    }
-                ]
-            },
-            //小站去所有地方 [fire-29, fire-35]
-            {
-                from: ["waypoint"],
-                to: ["stash", "warriv", "cain", NPC.Kashya, NPC.Akara, NPC.Charsi, NPC.Gheed, "portalspot", "waypoint"],
-                path: [
-                    {
-                        x: - 29,
-                        y: - 35,
-                        breakBarrier: 4
-                    },
-                    {
-                        x: - 24,
-                        y: - 32
-                    }
-                ]
+    return npc;
+};
+
+/*
+    重写openStash函数（私服禁用TK开储物箱）
+*/
+Town.openStash = function () {
+    if (getUIFlag(0x19)) {
+        return true;
+    }
+
+    var i, tick, stash,
+        //telekinesis = me.classid === 1 && me.getSkill(43, 1);
+        telekinesis = false; //anhei3私服禁用TK开储物箱
+
+    for (i = 0; i < 5; i += 1) {
+        this.move("stash");
+
+        stash = getUnit(2, 267);
+
+        if (stash) {
+            if (telekinesis) {
+                Skill.cast(43, 0, stash);
+            } else {
+                Misc.click(0, 0, stash);
+                //stash.interact();
             }
-        ],
-    },
+
+            tick = getTickCount();
+
+            while (getTickCount() - tick < 1000) {
+                if (getUIFlag(0x19)) {
+                    delay(200);
+
+                    return true;
+                }
+
+                delay(10);
+            }
+        }
+
+        if (i > 1) {
+            Packet.flash(me.gid);
+
+            if (stash) {
+                Pather.moveToUnit(stash);
+            } else {
+                this.move("stash");
+            }
+
+            telekinesis = false;
+        }
+    }
+
+    return false;
 };

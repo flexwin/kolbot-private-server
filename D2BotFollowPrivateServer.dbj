@@ -14,20 +14,10 @@ var StarterConfig = {
 	PleaseWaitTimeout: 30, // Seconds to wait before cancelling the 'Please Wait...' screen
 	WaitInLineTimeout: 60, // Seconds to wait before cancelling the 'Waiting in Line...' screen
 	GameDoesNotExistTimeout: 30, // Seconds to wait before cancelling the 'Game does not exist.' screen
+	Realms: ["2020-easy", "2020-hard"], // 在这里设置国度名称
 	TargetRealm: 2, //MF的国度 1代表第一个国度
 	MuleRealm: 1 //转仓的国度 1代表第一个国度
 };
-// 在这里设置国度名称
-/*  例子：
-var Realm = { 
-	1: "normal",
-	2: "VIP"
-}
-*/
-var Realm = {
-	1: "2020-easy",
-	2: "2020-hard"
-}
 
 /* Join game settings
 	Format: "leader's profile": ["leecher 1 profile", "leecher 2 profile", ...]
@@ -120,19 +110,18 @@ function updateCount() {
 }
 
 function changeRealm(targetRealm) {
-	if (me.realm !== Realm[targetRealm]) {
-		if (!getScript("libs/PrivateServer/Tools/ChangeRealm.js")) {
-			load("libs/PrivateServer/Tools/ChangeRealm.js"); //载入线程 更改国度
+	if (me.realm !== StarterConfig.Realms[targetRealm - 1]) {
+		if (!getScript("libs/private-server/tools/ChangeRealm.js")) {
+			load("libs/private-server/tools/ChangeRealm.js"); //载入线程 更改国度
 		}
-		while (!getScript("libs/PrivateServer/Tools/ChangeRealm.js").running) {
+		while (!getScript("libs/private-server/tools/ChangeRealm.js").running) {
 			delay(500);
 		}
-		Messaging.sendToScript("libs/PrivateServer/Tools/ChangeRealm.js", "realm" + targetRealm);
+		Messaging.sendToScript("libs/private-server/tools/ChangeRealm.js", "realm" + targetRealm);
 		while (!receivedRealm) {
 			delay(500);
 		}
 		receivedRealm = false;
-		return true;
 	}
 	return true;
 }
@@ -141,24 +130,17 @@ function changeRealm(targetRealm) {
 function ScriptMsgEvent(msg) {
 	switch (msg) {
 		case "mule":
-			if (!changeRealm(StarterConfig.MuleRealm)) {
-				throw new Error("failed to change realm");
-			}
+			changeRealm(StarterConfig.MuleRealm);
 			AutoMule.check = true;
 
 			break;
 		case "muleTorch":
-			if (!changeRealm(StarterConfig.MuleRealm)) {
-				throw new Error("failed to change realm");
-			}
+			changeRealm(StarterConfig.MuleRealm);
 			AutoMule.torchAnniCheck = 1;
 
 			break;
 		case "muleDone": //完成转仓
-			if (!changeRealm(StarterConfig.TargetRealm)) {
-				throw new Error("failed to change realm");
-			}
-
+			changeRealm(StarterConfig.TargetRealm);
 			break;
 		case "torch":
 			TorchSystem.check = true;
@@ -276,6 +258,8 @@ function dbjPause() {
 			}
 		}
 	}
+
+	return true;
 }
 
 function main() {
@@ -374,14 +358,13 @@ function locationAction() {
 			D2Bot.updateStatus("Lobby");
 
 			if (!firstLogin) {
-				if (changeRealm(StarterConfig.MuleRealm)) {
-					firstLogin = true;
-				}
+				changeRealm(StarterConfig.MuleRealm);
+				firstLogin = true;
 				break;
 			}
 
-			if (!getScript("libs/PrivateServer/Tools/TownModeChecker.js")) { //载入线程 城镇地图类型查看
-				load("libs/PrivateServer/Tools/TownModeChecker.js"); //载入线程 城镇地图类型查看
+			if (!getScript("libs/private-server/tools/TownModeChecker.js")) { //载入线程 城镇地图类型查看
+				load("libs/private-server/tools/TownModeChecker.js"); //载入线程 城镇地图类型查看
 			}
 
 			if (StarterConfig.JoinChannel !== "") {
@@ -392,9 +375,7 @@ function locationAction() {
 
 			if (ingame) {
 				if (AutoMule.outOfGameCheck() || TorchSystem.outOfGameCheck() || Gambling.outOfGameCheck() || CraftingSystem.outOfGameCheck()) {
-					if (!changeRealm(StarterConfig.TargetRealm)) { //检测后就需要改变国度
-						throw new Error("failed to change realm");
-					}
+					changeRealm(StarterConfig.TargetRealm); //检测后就需要改变国度
 					break;
 				}
 
@@ -433,9 +414,7 @@ function locationAction() {
 
 			if (ingame) {
 				if (AutoMule.outOfGameCheck() || TorchSystem.outOfGameCheck() || Gambling.outOfGameCheck() || CraftingSystem.outOfGameCheck()) {
-					if (!changeRealm(StarterConfig.TargetRealm)) { //检测后就需要改变国度
-						throw new Error("failed to change realm");
-					}
+					changeRealm(StarterConfig.TargetRealm); //检测后就需要改变国度
 					break;
 				}
 

@@ -6,20 +6,9 @@ var StarterConfig = {
 	ConnectingTimeout: 20, // Seconds to wait before cancelling the 'Connecting...' screen
 	PleaseWaitTimeout: 10, // Seconds to wait before cancelling the 'Please Wait...' screen
 	WaitInLineTimeout: 60, // Seconds to wait before cancelling the 'Waiting in Line...' screen
+	Realms: ["2020-easy", "2020-hard"], // 在这里设置国度名称
 	MuleRealm: 1 //转仓的国度 1代表第一个国度
 };
-
-// 在这里设置国度名称
-/*  例子：
-var Realm = { 
-	1: "normal",
-	2: "VIP"
-}
-*/
-var Realm = {
-	1: "2020-easy",
-	2: "2020-hard"
-}
 
 var master, gameInfo, connectFail, makeAcc, joinInfo,
 	muleMode, muleFilename, muleObj, handle, realmChanged,
@@ -399,24 +388,53 @@ function dbjPause() {
 			}
 		}
 	}
+
+	return true;
 }
 
 function changeRealm(targetRealm) {
-	if (me.realm !== Realm[targetRealm]) {
-		if (!getScript("libs/PrivateServer/Tools/ChangeRealm.js")) {
-			load("libs/PrivateServer/Tools/ChangeRealm.js"); //载入线程 更改国度
+	if (me.realm !== StarterConfig.Realms[targetRealm - 1]) {
+		if (!getScript("libs/private-server/tools/ChangeRealm.js")) {
+			load("libs/private-server/tools/ChangeRealm.js"); //载入线程 更改国度
 		}
-		while (!getScript("libs/PrivateServer/Tools/ChangeRealm.js").running) {
+		while (!getScript("libs/private-server/tools/ChangeRealm.js").running) {
 			delay(500);
 		}
-		Messaging.sendToScript("libs/PrivateServer/Tools/ChangeRealm.js", "realm" + targetRealm);
+		Messaging.sendToScript("libs/private-server/tools/ChangeRealm.js", "realm" + targetRealm);
 		while (!receivedRealm) {
 			delay(500);
 		}
 		receivedRealm = false;
-		return true;
 	}
 	return true;
+}
+
+function deleteGameTownMode() {
+	var file, fileLength, filePath, fileMsg, gameTownModes;
+	filePath = "libs/private-server/data/GameTownModes.json";
+
+	try {
+		file = File.open(filePath, 0);
+		fileLength = file.length;
+	} catch (e) {
+		throw new Error("Failed to open townMode File.");
+	} finally {
+		if (file) {
+			file.close();
+		}
+	}
+
+	if (fileLength) {
+		gameTownModes = JSON.parse(Misc.fileAction(filePath, 0));
+		//print(gameInfo.gameName);
+		delete gameTownModes[me.gamename];
+
+		fileMsg = JSON.stringify(gameTownModes);
+		Misc.fileAction(filePath, 1, fileMsg);
+		return true;
+	}
+
+	return false;
 }
 
 
@@ -549,6 +567,9 @@ function main() {
 						D2Bot.printToConsole("Done muling.", 7);
 						sendCopyData(null, master, 10, JSON.stringify({ status: "quit" }));
 						//delay(500);
+						if (!deleteGameTownMode()) { //转完仓删除TownMode信息
+							throw new Error("Failed to delete GameTownMode.");
+						}
 						D2Bot.stop(me.profile, true);
 
 						return;
@@ -605,15 +626,10 @@ function locationAction(location) {
 		case 3:
 			D2Bot.updateStatus("Lobby");
 
-			if (!realmChanged) {
-				if (changeRealm(StarterConfig.MuleRealm)) {
-					realmChanged = true;
-				}
-				break;
-			}
+			changeRealm(StarterConfig.MuleRealm);
 
-			if (!getScript("libs/PrivateServer/Tools/TownModeChecker.js")) { //载入线程 城镇地图类型查看
-				load("libs/PrivateServer/Tools/TownModeChecker.js"); //载入线程 城镇地图类型查看 （率先接收封包者需要填写文件）
+			if (!getScript("libs/private-server/tools/TownModeChecker.js")) { //载入线程 城镇地图类型查看
+				load("libs/private-server/tools/TownModeChecker.js"); //载入线程 城镇地图类型查看 （率先接收封包者需要填写文件）
 			}
 
 			if (makeNext) {
