@@ -119,7 +119,7 @@ function main() {
         fileMsg = JSON.stringify(townModes);
         Misc.fileAction(filePath, 1, fileMsg);
 
-        //D2Bot.printToConsole("\n Successfully added townMode [" + type + "]. \n File path: [" + filePath + "]. \n Total object number: " + filePath.length, 4);
+        D2Bot.printToConsole("type" + townModes["act" + me.act].length, 4);
 
         return true;
     };
