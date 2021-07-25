@@ -158,7 +158,7 @@ Town.openChests = function (range, times) {
         } while (unit.getNext());
     }
 
-    print(unitList.length);
+    //print(unitList.length);
 
     while (times > 0 && unitList.length > 0) {
         unitList.sort(Sort.units);
