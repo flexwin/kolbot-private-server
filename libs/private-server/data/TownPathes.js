@@ -17,7 +17,7 @@ Town.pathes = {
     type1: [
         //所有地方去小站 
         {
-            from: ["stash", "cain", NPC.Halbu, NPC.Tyrael, NPC.Jamella, NPC.Gheed, "portalspot"],
+            from: ["stash", "cain", NPC.Halbu, NPC.Tyrael, NPC.Jamella, "portalspot"],
             to: ["waypoint"],
             path: [
                 {
@@ -33,7 +33,7 @@ Town.pathes = {
         },
         //所有地方去出口（除了小站）
         {
-            from: ["stash", "cain", NPC.Halbu, NPC.Tyrael, NPC.Jamella, NPC.Gheed, "portalspot"],
+            from: ["stash", "cain", NPC.Halbu, NPC.Tyrael, NPC.Jamella, "portalspot"],
             to: ["exit"],
             path: [
                 {
