@@ -29,6 +29,10 @@ function main() {
                 //生成townMode文件
                 packetlist = []; //清空封包数组
                 break;
+
+            case 115: //F4
+                this.removeTownMode();
+                break;
             case 116: // F5
                 if (!this.showInfo()) { //在D2Bot#控制台上显示：人物坐标，鼠标所在坐标，离鼠标最近的路障/NPC的classID和名字，当前区域ID，点起在鼠标上的物品ID
                     throw new Error("Cannot show information.");
@@ -120,6 +124,22 @@ function main() {
         Misc.fileAction(filePath, 1, fileMsg);
 
         D2Bot.printToConsole("type" + townModes["act" + me.act].length, 4);
+
+        return true;
+    };
+
+    this.removeTownMode = function () {
+        var fileMsg,
+            filePath = "libs/private-server/data/TownModes.json",
+            townModes = JSON.parse(Misc.fileAction(filePath, 0)),
+            i = townModes["act" + me.act].length;
+
+        if (i) {
+            townModes["act" + me.act].splice(i - 1, 1);
+            fileMsg = JSON.stringify(townModes);
+            Misc.fileAction(filePath, 1, fileMsg);
+            D2Bot.printToConsole("Removed: type" + i, 4);
+        }
 
         return true;
     };

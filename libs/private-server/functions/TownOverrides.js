@@ -132,7 +132,7 @@ Town.followPath = function (path) {
 };
 
 Town.openChests = function (range, times) {
-    var i, unit,
+    var unit,
         unitList = [],
         containers = [
             "chest", "loose rock", "hidden stash", "loose boulder", "corpseonstick", "casket", "armorstand", "weaponrack", "barrel", "holeanim", "tomb2",
