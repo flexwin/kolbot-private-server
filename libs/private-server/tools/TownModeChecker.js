@@ -264,7 +264,8 @@ function main() {
                 checking = true;
                 this.startListen();
                 scriptBroadcast("townModeChecking");
-                preArea = me.area;
+                preArea = me.gameReady ? me.area : "lobby";
+                print(preArea);
 
                 break;
             case "stopChecking":
@@ -290,7 +291,7 @@ function main() {
 
     //开始主循环
     while (true) {
-        if (checking && me.ingame && me.inTown && this.areaChanged()) {  //当进游戏并且在城中
+        if (checking && me.gameReady && me.inTown && this.areaChanged()) {  //当进游戏并且在城中
             delay(1000); //等1秒收集封包
             if (!this.getTownMode()) {
                 throw new Error("Cannot get townMode.");
