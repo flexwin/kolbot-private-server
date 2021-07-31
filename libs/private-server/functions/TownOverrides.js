@@ -142,7 +142,7 @@ Town.openChests = function (range, times) {
             "tomb3", "roguecorpse", "ratnest", "corpse", "goo pile", "largeurn", "urn", "chest3", "jug", "skeleton", "guardcorpse", "sarcophagus", "object2",
             "cocoon", "basket", "stash", "hollow log", "hungskeleton", "pillar", "skullpile", "skull pile", "jar3", "jar2", "jar1", "bonechest", "woodchestl",
             "woodchestr", "barrel wilderness", "burialchestr", "burialchestl", "explodingchest", "chestl", "chestr", "groundtomb", "icecavejar1", "icecavejar2",
-            "icecavejar3", "icecavejar4", "deadperson", "deadperson2", "evilurn", "tomb1l", "tomb3l", "groundtombl"
+            "icecavejar3", "icecavejar4", "deadperson", "deadperson2", "evilurn", "tomb1l", "tomb3l", "groundtombl", "crate"
         ];
 
     range = range || 5;
@@ -260,6 +260,8 @@ Town.getPath = function (spot) {
     var i, typePathes,
         townMode = this.act[me.act - 1].townMode,
         mySpot = this.getNearestTownSpot();
+
+    print("From: " + Color.lgreen + mySpot + Color.white + ", To: " + Color.lgreen + spot);
 
     do {
         townMode = this.act[me.act - 1].townMode;
