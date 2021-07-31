@@ -12,6 +12,9 @@ Town.getNearestTownSpot = function () {
             if (distance < range) {
                 range = distance;
                 name = key;
+                if (name === NPC.Hratli && townSpot[i] === 5127 && townSpot[i + 1] === 5172) { //将Hratli改为meshif
+                    name = "meshif";
+                }
             }
         }
     }

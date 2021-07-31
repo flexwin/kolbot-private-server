@@ -265,7 +265,7 @@ function main() {
                 this.startListen();
                 scriptBroadcast("townModeChecking");
                 preArea = me.gameReady ? me.area : "lobby";
-                print(preArea);
+                //print(preArea);
 
                 break;
             case "stopChecking":
