@@ -54,8 +54,14 @@ Pather.useWaypoint = function useWaypoint(targetArea, check) {
                 }
 
                 if (townTargetAreas.indexOf(targetArea) > -1 && !Town.act[townTargetAreas.indexOf(targetArea)].townMode) { //如果需要去城中且目标城镇不存在townMode,则监听townMode
-                    if (!getScript("libs/PrivateServer/Tools/TownModeChecker.js")) { //载入线程 城镇地图类型查看
-                        load("libs/PrivateServer/Tools/TownModeChecker.js"); //载入线程 城镇地图类型查看
+                    if (!getScript("libs/private-server/tools/TownModeChecker.js")) { //检查线程
+                        throw new Error("Checker is not running!");
+                    }
+
+                    Messaging.sendToScript("libs/private-server/tools/TownModeChecker.js", "startChecking"); //让线程开始监听封包
+
+                    while (!townModeChecking) { //等待线程成功开始监听封包
+                        delay(50);
                     }
                 }
 
@@ -267,10 +273,11 @@ Pather.usePortal = function (targetArea, owner, unit) {
 
         portal = unit ? copyUnit(unit) : this.getPortal(targetArea, owner);
 
-        if (townTargetAreas.indexOf(targetArea) > -1 && !Town.act[townTargetAreas.indexOf(targetArea)].townMode) { //如果需要去城中且目标城镇不存在townMode,则监听townMode
-            if (!getScript("libs/PrivateServer/Tools/TownModeChecker.js")) { //载入线程 城镇地图类型查看
-                load("libs/PrivateServer/Tools/TownModeChecker.js"); //载入线程 城镇地图类型查看
-            }
+        //无论如何开始监听
+        Messaging.sendToScript("libs/private-server/tools/TownModeChecker.js", "startChecking"); //让线程开始监听封包
+
+        while (!townModeChecking) { //等待线程成功开始监听封包
+            delay(50);
         }
 
         if (portal) {
@@ -317,6 +324,11 @@ Pather.usePortal = function (targetArea, owner, unit) {
 
             while (getTickCount() - tick < Math.max(Math.round((i + 1) * 1000 / (i / 5 + 1)), me.ping * 2)) {
                 if (me.area !== preArea) {
+                    if (townTargetAreas.indexOf(me.area) === -1) { //如果不是传送到城内，则停止监听
+                        townModeChecking = false;
+                        Messaging.sendToScript("libs/private-server/tools/TownModeChecker.js", "stopChecking"); //让线程停止监听封包
+                    }
+
                     delay(100);
 
                     return true;

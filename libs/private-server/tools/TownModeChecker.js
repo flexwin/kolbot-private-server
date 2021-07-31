@@ -13,7 +13,9 @@ function main() {
 
     D2Bot.init();
 
-    var needCheck = true; //是否需要检查城镇地图类型（该私服城内是否有路障）
+    var needCheck = true, //是否需要检查城镇地图类型（该私服城内是否有路障）
+        checking = false,
+        preArea;
 
     var packetlist = []; //封包数组
 
@@ -89,6 +91,7 @@ function main() {
     this.shareTownMode = function (townMode) {
         Messaging.sendToScript("default.dbj", townMode);
         Messaging.sendToScript("libs/private-server/tools/TownChicken.js", townMode);
+
         return true;
     };
 
@@ -235,28 +238,64 @@ function main() {
 
 
     //监听并添加数据到封包数组
-    addEventListener("gamepacket", function (pBytes) {
-        if (pBytes[0] == 0x51) {
-            packetlist.push(pBytes);
+    this.startListen = function () {
+        addEventListener("gamepacket", function (pBytes) {
+            if (pBytes[0] == 0x51) {
+                packetlist.push(pBytes);
+            }
+        });
+        print(Color.orange + "TownModeChecker" + Color.white + " :: " + Color.lgreen + "start checking");
+    };
+
+    this.stopListen = function () {
+        removeEventListener("gamepacket", function (pBytes) {
+            if (pBytes[0] == 0x51) {
+                packetlist.push(pBytes);
+            }
+        });
+        packetlist = [];
+        checking = false;
+        print(Color.orange + "TownModeChecker" + Color.white + " :: " + Color.red + "stop checking");
+    };
+
+    this.scriptEvent = function (msg) {
+        switch (msg) {
+            case "startChecking":
+                checking = true;
+                this.startListen();
+                scriptBroadcast("townModeChecking");
+                preArea = me.area;
+
+                break;
+            case "stopChecking":
+                this.stopListen();
+
+                break;
         }
-    });
+    };
 
-    print(Color.orange + "TownModeChecker" + Color.white + " :: loaded.");
-
-    //需要改写pather的usewaypoint和useportal，如果目标在城内, 提前开启封包收集;
+    this.areaChanged = function () {
+        return preArea === me.area ? false : true;
+    }
 
     if (!needCheck) {
         return true; //如果不需要检测城镇地图类型则直接结束线程
     }
 
+    addEventListener("scriptmsg", this.scriptEvent);
+
+    print(Color.orange + "TownModeChecker" + Color.white + " :: loaded.");
+
+    //需要改写pather的usewaypoint和useportal，如果目标在城内, 提前开启封包收集;
+
     //开始主循环
     while (true) {
-        if (me.ingame && me.inTown) {  //当进游戏并且在城中
+        if (checking && me.ingame && me.inTown && this.areaChanged()) {  //当进游戏并且在城中
             delay(1000); //等1秒收集封包
             if (!this.getTownMode()) {
                 throw new Error("Cannot get townMode.");
             }
-            return true; //结束线程
+            this.stopListen();
         }
 
         delay(500);

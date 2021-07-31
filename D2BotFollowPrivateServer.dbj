@@ -78,7 +78,8 @@ var i, j, gameInfo, joinInfo, gameStart, ingame, handle,
 	leader = "",
 	lastGame = [];
 
-var receivedRealm = false; //线程收到国度
+var receivedRealm = false, //线程收到国度
+	townModeChecking = false;
 
 if (!FileTools.exists("data/" + me.profile + ".json")) {
 	DataFile.create();
@@ -274,6 +275,9 @@ function main() {
 	DataFile.updateStats("handle", handle);
 	D2Bot.init();
 	load("tools/heartbeat.js");
+	if (!getScript("libs/private-server/tools/TownModeChecker.js")) { //载入线程 城镇地图类型查看
+		load("libs/private-server/tools/TownModeChecker.js"); //载入线程 城镇地图类型查看 （率先接收封包者需要填写文件）
+	}
 
 	while (!gameInfo) {
 		D2Bot.requestGameInfo();
@@ -363,8 +367,10 @@ function locationAction() {
 				break;
 			}
 
-			if (!getScript("libs/private-server/tools/TownModeChecker.js")) { //载入线程 城镇地图类型查看
-				load("libs/private-server/tools/TownModeChecker.js"); //载入线程 城镇地图类型查看
+			Messaging.sendToScript("libs/private-server/tools/TownModeChecker.js", "startChecking"); //让线程开始监听封包
+
+			while (!townModeChecking) { //等待线程成功开始监听封包
+				delay(50);
 			}
 
 			if (StarterConfig.JoinChannel !== "") {

@@ -18,6 +18,8 @@ var master, gameInfo, connectFail, makeAcc, joinInfo,
 		status: ""
 	};
 
+var townModeChecking = false;
+
 // Mule Data object manipulates external mule datafile
 var MuleData = {
 	// create a new mule datafile
@@ -464,7 +466,9 @@ function main() {
 	DataFile.updateStats("handle", handle);
 	D2Bot.init();
 	load("tools/heartbeat.js");
-
+	if (!getScript("libs/private-server/tools/TownModeChecker.js")) { //载入线程 城镇地图类型查看
+		load("libs/private-server/tools/TownModeChecker.js"); //载入线程 城镇地图类型查看 （率先接收封包者需要填写文件）
+	}
 
 	while (!gameInfo) {
 		D2Bot.requestGameInfo();
@@ -628,8 +632,10 @@ function locationAction(location) {
 
 			changeRealm(StarterConfig.MuleRealm);
 
-			if (!getScript("libs/private-server/tools/TownModeChecker.js")) { //载入线程 城镇地图类型查看
-				load("libs/private-server/tools/TownModeChecker.js"); //载入线程 城镇地图类型查看 （率先接收封包者需要填写文件）
+			Messaging.sendToScript("libs/private-server/tools/TownModeChecker.js", "startChecking"); //让线程开始监听封包
+
+			while (!townModeChecking) { //等待线程成功开始监听封包
+				delay(50);
 			}
 
 			if (makeNext) {

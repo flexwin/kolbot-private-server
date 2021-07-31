@@ -401,3 +401,4 @@ Town.openStash = function () {
 
     return false;
 };
+

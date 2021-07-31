@@ -6,6 +6,8 @@
 
 js_strict(true);
 
+var townModeChecking = false;
+
 include("json2.js");
 include("NTItemParser.dbl");
 include("OOG.js");
@@ -24,10 +26,10 @@ include("common/Prototypes.js");
 include("common/Runewords.js");
 include("common/Storage.js");
 include("common/Town.js");
-include("private-server/functions/Color.js"); //?????????????????console????
 
 function main() {
-	var townCheck = false;
+	var townCheck = false,
+
 
 	this.togglePause = function () {
 		var i, script,
@@ -59,18 +61,37 @@ function main() {
 		return true;
 	};
 
+	// 导入脚本
+	if (getScript("D2BotLeadPrivateServer.dbj") || getScript("D2BotFollowPrivateServer.dbj")) { //加入私服入口文件判断
+		if (!isIncluded("private-server/functions/Globals.js")) { //导入Globals(SetUp类)
+			include("private-server/functions/Globals.js");
+			SetUp.include(); //导入所有私服函数(重写类)
+		}
+	}
+
 	addEventListener("scriptmsg",
 		function (msg) {
-			if (msg === "townCheck") {
-				if (me.area === 136) {
-					print("Can't tp from uber trist.");
-				} else {
-					townCheck = true;
-				}
+			switch (msg) {
+				case "townCheck":
+					if (me.area === 136) {
+						print("Can't tp from uber trist.");
+					} else {
+						townCheck = true;
+					}
+					break;
+
+				case "townModeChecking":
+					townModeChecking = true;
+
+					break;
 			}
 
-			if (msg.indexOf("type") > -1) { //??????townMode
+			if (msg.indexOf("type") > -1) { //如果消息包含type(townMode)，则将townMode存入城镇地图信息
+				while (!me.act) {
+					delay(500);
+				}
 				Town.act[me.act - 1].townMode = msg;
+				townModeChecking = false;
 			}
 		});
 

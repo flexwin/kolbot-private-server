@@ -91,7 +91,8 @@ var gameInfo, gameStart, ingame, chatActionsDone, pingQuit,
 		announce: false
 	};
 
-var receivedRealm = false; //线程收到国度
+var receivedRealm = false, //线程收到国度
+	townModeChecking = false;
 
 function sayMsg(string) {
 	if (!useChat) {
@@ -277,6 +278,10 @@ function ScriptMsgEvent(msg) {
 			receivedRealm = true;
 
 			break;
+		case "townModeChecking":
+			townModeChecking = true;
+
+			break;
 	}
 }
 
@@ -359,6 +364,9 @@ function main() {
 	delay(500);
 	D2Bot.init();
 	load("tools/heartbeat.js");
+	if (!getScript("libs/private-server/tools/TownModeChecker.js")) { //载入线程 城镇地图类型查看
+		load("libs/private-server/tools/TownModeChecker.js"); //载入线程 城镇地图类型查看
+	}
 
 	while (!gameInfo) {
 		D2Bot.requestGameInfo();
@@ -433,9 +441,13 @@ function locationAction(location) {
 				break;
 			}
 
-			if (!getScript("libs/private-server/tools/TownModeChecker.js")) { //载入线程 城镇地图类型查看
-				load("libs/private-server/tools/TownModeChecker.js"); //载入线程 城镇地图类型查看
+			Messaging.sendToScript("libs/private-server/tools/TownModeChecker.js", "startChecking"); //让线程开始监听封包
+
+			while (!townModeChecking) { //等待线程成功开始监听封包
+				delay(50);
 			}
+
+			townModeChecking = false;
 
 			if (lastGameStatus === "pending") {
 				gameCount += 1;
