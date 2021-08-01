@@ -29,6 +29,9 @@ function main() {
                 //生成townMode文件
                 packetlist = []; //清空封包数组
                 break;
+            case 113: //F2
+                this.showSameRate();
+                break;
 
             case 115: //F4
                 this.removeTownMode();
@@ -39,6 +42,76 @@ function main() {
                 }
                 break;
         }
+    };
+
+    this.showSameRate = function () {
+        var i, objectList = [], sameNo,
+            obj, classId, fireUnit, fire, x, y,
+            savedObjectList,
+            sameRate,
+            filePath = "libs/private-server/data/TownModes.json",
+            townModes = JSON.parse(Misc.fileAction(filePath, 0));
+
+        if (townModes["act" + me.act].length === 0) {
+            return true;
+        }
+
+        if (me.act === 1) {
+            fireUnit = getPresetUnit(1, 2, 39);
+            fire = {
+                x: fireUnit.roomx * 5 + fireUnit.x,
+                y: fireUnit.roomy * 5 + fireUnit.y
+            };
+        }
+
+        for (i = 0; i < packetlist.length; i++) {
+            classId = this.convertpBytes(packetlist[i], 6, "word");
+            x = this.convertpBytes(packetlist[i], 8, "word");
+            y = this.convertpBytes(packetlist[i], 10, "word");
+            //如果在A1则记录相对坐标
+            x = (me.act === 1) ? (x - fire.x) : x;
+            y = (me.act === 1) ? (y - fire.y) : y;
+            obj = {
+                classId: classId,
+                x: x,
+                y: y
+            };
+            objectList.push(obj);
+        }
+
+        if (!objectList.length) {
+            return false;
+        }
+
+        objectList = this.removeDuplicates(objectList);
+
+        //对比objectList(检测到的)townModes(文件中的)
+
+        for (i = 0; i < townModes["act" + me.act].length; i++) {
+            savedObjectList = townModes["act" + me.act][i];
+            sameNo = this.compareLists(objectList, savedObjectList);
+            sameRate = Math.round((sameNo / objectList.length) * 100) + "%";
+            D2Bot.printToConsole("Same Rate: type" + (i + 1) + "  " + sameRate, 4);
+        }
+
+        return true;
+    };
+
+    /*
+        比较2个数组中的对象，返回相同的数量
+    */
+    this.compareLists = function (arr1, arr2) {
+        var i, j,
+            sameNo = 0;
+
+        for (i = 0; i < arr1.length; i++) {
+            for (j = 0; j < arr2.length; j++) {
+                if (arr1[i].x === arr2[j].x && arr1[i].y === arr2[j].y && arr1[i].classId === arr2[j].classId) {
+                    sameNo++;
+                }
+            }
+        }
+        return sameNo;
     };
 
     /*
@@ -123,7 +196,7 @@ function main() {
         fileMsg = JSON.stringify(townModes);
         Misc.fileAction(filePath, 1, fileMsg);
 
-        D2Bot.printToConsole("type" + townModes["act" + me.act].length, 4);
+        D2Bot.printToConsole("Added: type" + townModes["act" + me.act].length, 4);
 
         return true;
     };
