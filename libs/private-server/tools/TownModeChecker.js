@@ -301,7 +301,7 @@ function main() {
     //开始主循环
     while (true) {
         if (checking && me.gameReady && me.inTown && this.areaChanged()) {  //当进游戏并且在城中
-            delay(2000); //等1秒收集封包
+            delay(1000); //等1秒收集封包
             if (!this.getTownMode()) {
                 throw new Error("Cannot get townMode.");
             }
