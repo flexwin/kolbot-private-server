@@ -49,10 +49,14 @@ Town.moveToSpot = function (spot) {
         //print("moveToSpot: " + spot + " from " + me.x + ", " + me.y);
 
         if (getDistance(me, townSpot[i], townSpot[i + 1]) > 2) {
-            path = this.getPath(spot);
-            if (this.existBarriers && path) {
-                this.followPath(path);
-                Pather.moveTo(townSpot[i], townSpot[i + 1], 3, false, false);
+            if (this.existBarriers) {
+                path = this.getPath(spot);
+                if (path) {
+                    this.followPath(path);
+                    Pather.moveTo(townSpot[i], townSpot[i + 1], 3, false, false);
+                } else {
+                    Pather.moveTo(townSpot[i], townSpot[i + 1], 3, false, true);
+                }
             } else {
                 Pather.moveTo(townSpot[i], townSpot[i + 1], 3, false, true);
             }
