@@ -23,7 +23,7 @@ function main() {
         通过封包判断地图类型
     */
     this.getTownMode = function () {
-        var i, objectList = [], sameNo, townMode,
+        var i, objectList = [], sameNo, townMode, sameRate,
             obj, classId, fireUnit, fire, x, y,
             savedObjectList,
             maxSameNo = 0,
@@ -73,18 +73,21 @@ function main() {
         for (i = 0; i < townModes["act" + me.act].length; i++) {
             savedObjectList = townModes["act" + me.act][i];
             sameNo = this.compareLists(objectList, savedObjectList);
+
             if (sameNo > maxSameNo) {
                 maxSameNo = sameNo;
                 townMode = "type" + (i + 1);
             }
         }
 
+        sameRate = Math.round((maxSameNo / objectList.length) * 100) + "%";
+
         this.writeTownMode(townMode);
 
         //写完townMode之后 告诉游戏线程和吃鸡线程TownMode
         this.shareTownMode(townMode);
 
-        print("TownMode: " + townMode);
+        print("TownMode: " + townMode + "  " + sameRate);
         return true;
     };
 
@@ -193,13 +196,19 @@ function main() {
         去除数组中的重复对象
     */
     this.removeDuplicates = function (array) {
-        var i, j;
+        var i, j, startLength;
+
+        startLength = array.length;
 
         for (i = 0; i < array.length; i++) {
             for (j = i + 1; j < array.length;) {
                 if (array[i].x === array[j].x && array[i].y === array[j].y) { //通过属性进行匹配
                     array.splice(j, 1); //去除重复的对象
-                    array[i].repeat = true; //增加重复属性
+                    if (array[i].repeat) { //增加重复属性
+                        array[i].repeat++;
+                    } else {
+                        array[i].repeat = 1;
+                    }
                 } else {
                     j++;
                 }
@@ -239,6 +248,7 @@ function main() {
 
     //监听并添加数据到封包数组
     this.startListen = function () {
+        packetlist = [];
         addEventListener("gamepacket", function (pBytes) {
             if (pBytes[0] == 0x51) {
                 packetlist.push(pBytes);
@@ -253,7 +263,6 @@ function main() {
                 packetlist.push(pBytes);
             }
         });
-        packetlist = [];
         checking = false;
         print(Color.orange + "TownModeChecker" + Color.white + " :: " + Color.red + "stop checking");
     };
@@ -292,7 +301,7 @@ function main() {
     //开始主循环
     while (true) {
         if (checking && me.gameReady && me.inTown && this.areaChanged()) {  //当进游戏并且在城中
-            delay(1000); //等1秒收集封包
+            delay(2000); //等1秒收集封包
             if (!this.getTownMode()) {
                 throw new Error("Cannot get townMode.");
             }
