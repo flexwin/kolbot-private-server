@@ -16,10 +16,26 @@ function main() {
     include("common/Misc.js");
     include("common/Prototypes.js");
 
+    ControlAction.click = function (type, x, y, xsize, ysize, targetx, targety) { //去除打印
+        var control = getControl(type, x, y, xsize, ysize);
+
+        if (!control) {
+            //print("control not found " + type + " " + x + " " + y + " location " + getLocation());
+
+            return false;
+        }
+
+        control.click(targetx, targety);
+
+        return true;
+    };
+
+
     D2Bot.init();
 
     var packetlist = [], //封包数组
-        ingame = false;
+        ingame = false,
+        findingDiffRoom = false;
 
     //按键事件触发函数
     this.keyEvent = function (key) {
@@ -27,10 +43,12 @@ function main() {
             case 112: // F1
                 this.editTownModeFile(packetlist);
                 //生成townMode文件
-                packetlist = []; //清空封包数组
                 break;
             case 113: //F2
-                this.showSameRate();
+                findingDiffRoom = !findingDiffRoom;
+                if (findingDiffRoom) {
+                    D2Bot.printToConsole("Finding room...... Press F2 to stop.", 4);
+                }
                 break;
 
             case 115: //F4
@@ -44,15 +62,34 @@ function main() {
         }
     };
 
-    this.showSameRate = function () {
-        var i, objectList = [], sameNo,
+    this.getNextRoom = function () {
+        Messaging.sendToScript("tools/ToolsThread.js", "quit");
+
+        while (!getLocation() === 1) {
+            delay(50);
+        }
+
+        delay(500);
+
+        while (!ControlAction.click(6, 533, 469, 120, 20)) { // Create
+            delay(500);
+        }
+
+        //到了大厅后 随机建立房间
+        ControlAction.createGame(this.randomWord(true, 5, 10), "1", "Highest", false);
+
+        return true;
+    };
+
+    this.checkRoom = function () {
+        var i, objectList = [], sameNo, maxSameNo = 0, similarType, sameRate,
             obj, classId, fireUnit, fire, x, y,
             savedObjectList,
-            sameRate,
             filePath = "libs/private-server/data/TownModes.json",
             townModes = JSON.parse(Misc.fileAction(filePath, 0));
 
         if (townModes["act" + me.act].length === 0) {
+            findingDiffRoom = false;
             return true;
         }
 
@@ -80,6 +117,7 @@ function main() {
         }
 
         if (!objectList.length) {
+            print("!!");
             return false;
         }
 
@@ -90,11 +128,40 @@ function main() {
         for (i = 0; i < townModes["act" + me.act].length; i++) {
             savedObjectList = townModes["act" + me.act][i];
             sameNo = this.compareLists(objectList, savedObjectList);
-            sameRate = Math.round((sameNo / objectList.length) * 100) + "%";
-            D2Bot.printToConsole("Same Rate: type" + (i + 1) + "  " + sameRate, 4);
+            if (sameNo === objectList.length) { //如果重复率为100%
+                this.getNextRoom();
+                return true;
+            }
+            if (sameNo > maxSameNo) {
+                maxSameNo = sameNo;
+                similarType = "type" + (i + 1);
+            }
         }
 
+        findingDiffRoom = false; //如果没有重复率为100%的 则停止
+
+        sameRate = Math.round((maxSameNo / objectList.length) * 100) + "%";
+
+        D2Bot.printToConsole("Room Found. Similar townMode: " + similarType + "  " + sameRate, 4);//打印最相似的地图类型和相似律
+
         return true;
+    };
+
+    this.randomWord = function (randomFlag, min, max) {
+        var str = "",
+            range = min,
+            arr = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
+
+        // 随机产生
+        if (randomFlag) {
+            range = Math.round(Math.random() * (max - min)) + min;
+        }
+        var pos;
+        for (var i = 0; i < range; i++) {
+            pos = Math.round(Math.random() * (arr.length - 1));
+            str += arr[pos];
+        }
+        return str;
     };
 
     /*
@@ -240,7 +307,7 @@ function main() {
             }
         }
 
-        print("removed: " + (startLength - array.length));
+        //print("removed: " + (startLength - array.length));
 
         return array;
     };
@@ -381,10 +448,16 @@ function main() {
             }
         }
 
-        if ((me.ingame && me.inTown)) {
+        if ((me.gameReady && me.inTown)) {
             if (!ingame) {
                 ingame = true;
                 print(Color.orange + "TownModeHelper" + Color.white + " :: Press " + Color.lgold + "F1 " + Color.white + "to add townMode File, " + Color.lgold + "F5 " + Color.white + "to show information.");
+                print(Color.orange + "TownModeHelper" + Color.white + " :: Press " + Color.lgold + "F2 " + Color.white + "to get different room, " + Color.lgold + "F4 " + Color.white + "to delete last townMode.");
+            }
+            if (findingDiffRoom) {
+                //print("finding");
+                delay(1000);
+                this.checkRoom();
             }
         }
 
