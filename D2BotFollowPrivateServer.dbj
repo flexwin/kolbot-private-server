@@ -14,7 +14,7 @@ var StarterConfig = {
 	PleaseWaitTimeout: 30, // Seconds to wait before cancelling the 'Please Wait...' screen
 	WaitInLineTimeout: 60, // Seconds to wait before cancelling the 'Waiting in Line...' screen
 	GameDoesNotExistTimeout: 30, // Seconds to wait before cancelling the 'Game does not exist.' screen
-	Realms: ["2020-easy", "2020-hard"], // 在这里设置国度名称
+	Realms: ["Atlas", "Atlas-VIP"], // 在这里设置国度名称
 	TargetRealm: 2, //MF的国度 1代表第一个国度
 	MuleRealm: 1 //转仓的国度 1代表第一个国度
 };
