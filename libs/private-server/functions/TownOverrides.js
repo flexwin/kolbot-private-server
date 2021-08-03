@@ -133,9 +133,69 @@ Town.followPath = function (path) {
         if (path[i].breakBarrier) {
             this.openChests(5, path[i].breakBarrier);
         }
+        if (path[i].useTpPad) {
+            if (!this.useTpPad(5)) {
+                print("Failed to use TpPad!")
+            }
+        }
     }
 
     return true;
+};
+
+Town.getTpPad = function (range) {
+    var tpPad = getUnit(2, "teleportation pad");
+
+    if (tpPad) {
+        do {
+            if (getDistance(me, tpPad) <= range) {
+                return (copyUnit(tpPad));
+            }
+        } while (tpPad.getNext());
+    }
+
+    return false;
+};
+
+Town.useTpPad = function (range) {
+    me.cancel();
+
+    var i, tick, tpPad,
+        preArea = { x: me.x, y: me.y };
+
+    for (i = 0; i < 10; i += 1) {
+        tpPad = this.getTpPad(range);
+
+        if (tpPad) {
+            if (i < 2) {
+                sendPacket(1, 0x13, 4, 0x2, 4, tpPad.gid);
+            } else {
+                Misc.click(0, 0, tpPad);
+            }
+
+            tick = getTickCount();
+
+            while (getTickCount() - tick < Math.max(Math.round((i + 1) * 1000 / (i / 5 + 1)), me.ping * 2)) {
+                if (getDistance(me.x, me.y, preArea.x, preArea.y) > 5) {
+                    delay(100);
+
+                    return true;
+                }
+
+                delay(10);
+            }
+
+            if (i > 1) {
+                Packet.flash(me.gid);
+            }
+        } else {
+            Packet.flash(me.gid);
+        }
+
+        delay(200 + me.ping);
+    }
+
+    return false;
 };
 
 Town.openChests = function (range, times) {
