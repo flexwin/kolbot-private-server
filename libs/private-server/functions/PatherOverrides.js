@@ -206,6 +206,9 @@ Pather.moveToExit = function (targetArea, use, clearPath) {
                     if (!Town.move("exit")) {
                         return false;
                     }
+                    if (!this.moveTo(dest[0], dest[1], 3, clearPath)) {
+                        return false;
+                    }
                 } else {
                     if (!this.moveTo(dest[0], dest[1], 3, clearPath)) {
                         return false;
@@ -273,14 +276,15 @@ Pather.usePortal = function (targetArea, owner, unit) {
 
         portal = unit ? copyUnit(unit) : this.getPortal(targetArea, owner);
 
-        //无论如何开始监听
-        Messaging.sendToScript("libs/private-server/tools/TownModeChecker.js", "startChecking"); //让线程开始监听封包
-
-        while (!townModeChecking) { //等待线程成功开始监听封包
-            delay(50);
-        }
-
         if (portal) {
+
+            //无论如何开始监听
+            Messaging.sendToScript("libs/private-server/tools/TownModeChecker.js", "startChecking"); //让线程开始监听封包
+
+            while (!townModeChecking) { //等待线程成功开始监听封包
+                delay(50);
+            }
+
             if (i === 0) {
                 //useTK = me.classid === 1 && me.getSkill(43, 1) && me.inTown && portal.getParent();
                 useTK = false; //（私服禁用TK portal）
