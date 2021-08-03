@@ -36,6 +36,7 @@ function main() {
             //print("gotfromFile");
             //print(townMode);
             this.shareTownMode(townMode);
+            print("TownMode: " + townMode);
             return true;
         }
 

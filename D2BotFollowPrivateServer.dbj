@@ -32,16 +32,9 @@ var StarterConfig = {
 */
 
 var JoinSettings = {
-	/*
-	"csor": ["nec"],
-	"csora": ["bha"],
-	"csorb": ["bhb"],
-	"csorc": ["bhc"],
-	"csord": ["bhd"],
-	"csore": ["bhe"],
-	"csorf": ["bhf"],
-	"baalsora": ["baalbha", "baalwxa", "diablosora", "diablobha", "diablowxa"]
-	*/
+
+	"Lead": ["follow"]
+
 };
 
 // Advanced config - you don't have to edit this unless you need some of the features provided
@@ -70,6 +63,7 @@ include("gambling.js");
 include("craftingsystem.js");
 include("torchsystem.js");
 include("common/misc.js");
+include("private-server/functions/Color.js"); //引入颜色对象，解决编码不兼容导致的console显色问题
 
 var i, j, gameInfo, joinInfo, gameStart, ingame, handle,
 	firstLogin, chatActionsDone, lastGameTick, connectFail,
@@ -167,6 +161,10 @@ function ScriptMsgEvent(msg) {
 			break;
 		case "receivedRealm":
 			receivedRealm = true;
+
+			break;
+		case "townModeChecking":
+			townModeChecking = true;
 
 			break;
 	}
@@ -309,7 +307,7 @@ function main() {
 		while (me.ingame) { // returns true before actually in game so we can't only use this check
 			if (me.gameReady) { // returns false when switching acts so we can't use while
 				if (!ingame) {
-					print("ÿc4Updating Status");
+					print(Color.dgold + "Updating Status");
 					//D2Bot.updateStatus("Game: " + me.gamename);
 
 					lastGameStatus = "ingame";
