@@ -55,7 +55,7 @@ Town.moveToSpot = function (spot) {
                     this.followPath(path);
                     Pather.moveTo(townSpot[i], townSpot[i + 1], 3, false, false);
                 } else {
-                    Pather.moveTo(townSpot[i], townSpot[i + 1], 3, false, true);
+                    Pather.moveTo(townSpot[i], townSpot[i + 1], 3, false, (spot === "exit" ? false : true));
                 }
             } else {
                 Pather.moveTo(townSpot[i], townSpot[i + 1], 3, false, true);

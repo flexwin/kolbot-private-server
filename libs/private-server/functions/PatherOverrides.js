@@ -206,9 +206,6 @@ Pather.moveToExit = function (targetArea, use, clearPath) {
                     if (!Town.move("exit")) {
                         return false;
                     }
-                    if (!this.moveTo(dest[0], dest[1], 3, clearPath)) {
-                        return false;
-                    }
                 } else {
                     if (!this.moveTo(dest[0], dest[1], 3, clearPath)) {
                         return false;
