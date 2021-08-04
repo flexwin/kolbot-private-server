@@ -28,7 +28,7 @@ include("common/Storage.js");
 include("common/Town.js");
 
 function main() {
-	var townCheck = false,
+	var townCheck = false;
 
 
 	this.togglePause = function () {
