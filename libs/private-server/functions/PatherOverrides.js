@@ -202,7 +202,6 @@ Pather.moveToExit = function (targetArea, use, clearPath) {
                 if (me.inTown) {
                     Town.initialize();
                     Town.act[me.act - 1].spot.exit = [dest[0], dest[1]];
-                    print("moveToExit");
                     if (!Town.move("exit")) {
                         return false;
                     }
@@ -218,6 +217,7 @@ Pather.moveToExit = function (targetArea, use, clearPath) {
                 if (use || i < areas.length - 1) {
                     switch (currExit.type) {
                         case 1: // walk through
+                            print("walk throgh");
                             targetRoom = this.getNearestRoom(areas[i]);
 
                             if (targetRoom) {

@@ -94,6 +94,12 @@ Town.moveToSpot = function (spot) {
                 }
 
                 break;
+            case "exit":
+                if (getDistance(me, townSpot[i], townSpot[i + 1]) < 10) {
+                    return true;
+                }
+
+                break;
             default:
                 if (!!getUnit(1, spot)) {
                     return true;
