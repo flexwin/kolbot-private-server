@@ -51,6 +51,10 @@ function main() {
                 }
                 break;
 
+            case 114:
+                this.checkRoom();
+                break;
+
             case 115: //F4
                 this.removeTownMode();
                 break;
@@ -74,6 +78,12 @@ function main() {
         while (!ControlAction.click(6, 533, 469, 120, 20)) { // Create
             delay(500);
         }
+
+        while (!getLocation() === 4) {
+            delay(50);
+        }
+
+        delay(500);
 
         //到了大厅后 随机建立房间
         ControlAction.createGame(this.randomWord(true, 5, 10), "1", "Highest", false);
@@ -128,7 +138,7 @@ function main() {
         for (i = 0; i < townModes["act" + me.act].length; i++) {
             savedObjectList = townModes["act" + me.act][i];
             sameNo = this.compareLists(objectList, savedObjectList);
-            if (sameNo === objectList.length) { //如果重复率为100%
+            if (findingDiffRoom && sameNo === objectList.length) { //如果重复率为100%
                 this.getNextRoom();
                 return true;
             }
@@ -138,11 +148,18 @@ function main() {
             }
         }
 
-        findingDiffRoom = false; //如果没有重复率为100%的 则停止
-
         sameRate = Math.round((maxSameNo / objectList.length) * 100) + "%";
 
-        D2Bot.printToConsole("Room Found. Similar townMode: " + similarType + "  " + sameRate, 4);//打印最相似的地图类型和相似律
+        if (findingDiffRoom) {
+            D2Bot.printToConsole("Room Found. Similar townMode: " + similarType + "  " + sameRate, 4);//打印最相似的地图类型和相似律
+            findingDiffRoom = false; //如果没有重复率为100%的 则停止
+        } else {
+            if (sameRate === "100%") {
+                D2Bot.printToConsole("Current Room: " + similarType, 4);
+            } else {
+                D2Bot.printToConsole("Current Room: None. Similar Type: " + similarType + "  " + sameRate, 4);//打印最相似的地图类型和相似律
+            }
+        }
 
         return true;
     };
@@ -373,6 +390,8 @@ function main() {
         }
 
         unit = getUnit(2);
+
+        print(fire.x + "   " + fire.y);
 
         if (unit) {
             do {
