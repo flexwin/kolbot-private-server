@@ -18,7 +18,8 @@ var master, gameInfo, connectFail, makeAcc, joinInfo,
 		status: ""
 	};
 
-var townModeChecking = false;
+var receivedRealm = false, //线程收到国度
+	townModeChecking = false;
 
 // Mule Data object manipulates external mule datafile
 var MuleData = {
@@ -246,6 +247,20 @@ function ReceiveCopyData(mode, msg) {
 	}
 }
 
+function ScriptMsgEvent(msg) {
+	switch (msg) {
+		case "receivedRealm":
+			receivedRealm = true;
+
+			break;
+		case "townModeChecking":
+			townModeChecking = true;
+
+			break;
+	}
+}
+
+
 // set next account - increase account number in mule datafile
 function nextAccount() {
 	var obj = MuleData.read();
@@ -457,6 +472,7 @@ include("common/prototypes.js");
 include("common/collmap.js");
 
 addEventListener("copydata", ReceiveCopyData);
+addEventListener('scriptmsg', ScriptMsgEvent);
 
 function main() {
 	while (!handle) {
@@ -630,7 +646,11 @@ function locationAction(location) {
 		case 3:
 			D2Bot.updateStatus("Lobby");
 
-			changeRealm(StarterConfig.MuleRealm);
+			if (!realmChanged) {
+				changeRealm(StarterConfig.MuleRealm);
+				realmChanged = true;
+				break;
+			}
 
 			Messaging.sendToScript("libs/private-server/tools/TownModeChecker.js", "startChecking"); //让线程开始监听封包
 
