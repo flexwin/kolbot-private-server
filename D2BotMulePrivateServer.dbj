@@ -18,8 +18,7 @@ var master, gameInfo, connectFail, makeAcc, joinInfo,
 		status: ""
 	};
 
-var receivedRealm = false, //线程收到国度
-	townModeChecking = false;
+var receivedRealm = false; //线程收到国度
 
 // Mule Data object manipulates external mule datafile
 var MuleData = {
@@ -253,10 +252,6 @@ function ScriptMsgEvent(msg) {
 			receivedRealm = true;
 
 			break;
-		case "townModeChecking":
-			townModeChecking = true;
-
-			break;
 	}
 }
 
@@ -426,35 +421,6 @@ function changeRealm(targetRealm) {
 	return true;
 }
 
-function deleteGameTownMode() {
-	var file, fileLength, filePath, fileMsg, gameTownModes;
-	filePath = "libs/private-server/data/GameTownModes.json";
-
-	try {
-		file = File.open(filePath, 0);
-		fileLength = file.length;
-	} catch (e) {
-		throw new Error("Failed to open townMode File.");
-	} finally {
-		if (file) {
-			file.close();
-		}
-	}
-
-	if (fileLength) {
-		gameTownModes = JSON.parse(Misc.fileAction(filePath, 0));
-		//print(gameInfo.gameName);
-		delete gameTownModes[me.gamename];
-
-		fileMsg = JSON.stringify(gameTownModes);
-		Misc.fileAction(filePath, 1, fileMsg);
-		return true;
-	}
-
-	return false;
-}
-
-
 include("json2.js");
 include("oog.js");
 include("automule.js");
@@ -482,9 +448,6 @@ function main() {
 	DataFile.updateStats("handle", handle);
 	D2Bot.init();
 	load("tools/heartbeat.js");
-	if (!getScript("libs/private-server/tools/TownModeChecker.js")) { //载入线程 城镇地图类型查看
-		load("libs/private-server/tools/TownModeChecker.js"); //载入线程 城镇地图类型查看 （率先接收封包者需要填写文件）
-	}
 
 	while (!gameInfo) {
 		D2Bot.requestGameInfo();
@@ -587,9 +550,6 @@ function main() {
 						D2Bot.printToConsole("Done muling.", 7);
 						sendCopyData(null, master, 10, JSON.stringify({ status: "quit" }));
 						//delay(500);
-						if (!deleteGameTownMode()) { //转完仓删除TownMode信息
-							throw new Error("Failed to delete GameTownMode.");
-						}
 						D2Bot.stop(me.profile, true);
 
 						return;
@@ -650,12 +610,6 @@ function locationAction(location) {
 				changeRealm(StarterConfig.MuleRealm);
 				realmChanged = true;
 				break;
-			}
-
-			Messaging.sendToScript("libs/private-server/tools/TownModeChecker.js", "startChecking"); //让线程开始监听封包
-
-			while (!townModeChecking) { //等待线程成功开始监听封包
-				delay(50);
 			}
 
 			if (makeNext) {

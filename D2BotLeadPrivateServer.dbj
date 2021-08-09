@@ -91,8 +91,7 @@ var gameInfo, gameStart, ingame, chatActionsDone, pingQuit,
 		announce: false
 	};
 
-var receivedRealm = false, //线程收到国度
-	townModeChecking = false;
+var receivedRealm = false; //线程收到国度
 
 function sayMsg(string) {
 	if (!useChat) {
@@ -278,10 +277,6 @@ function ScriptMsgEvent(msg) {
 			receivedRealm = true;
 
 			break;
-		case "townModeChecking":
-			townModeChecking = true;
-
-			break;
 	}
 }
 
@@ -319,38 +314,6 @@ function randomString(len) {
 	return rval;
 }
 
-function deleteGameTownMode() {
-	var file, fileLength, filePath, fileMsg, gameTownModes;
-	filePath = "libs/private-server/data/GameTownModes.json";
-
-	try {
-		file = File.open(filePath, 0);
-		fileLength = file.length;
-	} catch (e) {
-		throw new Error("Failed to open townMode File.");
-	} finally {
-		if (file) {
-			file.close();
-		}
-	}
-
-	if (fileLength) {
-		gameTownModes = JSON.parse(Misc.fileAction(filePath, 0));
-		//print(gameInfo.gameName);
-		for (var key in gameTownModes) {
-			if (key.toLowerCase().indexOf(gameInfo.gameName) > -1) {
-				delete gameTownModes[key];
-			}
-		}
-
-		fileMsg = JSON.stringify(gameTownModes);
-		Misc.fileAction(filePath, 1, fileMsg);
-		return true;
-	}
-
-	return false;
-}
-
 function main() {
 	debugLog(me.profile);
 	addEventListener('copydata', ReceiveCopyData);
@@ -364,9 +327,6 @@ function main() {
 	delay(500);
 	D2Bot.init();
 	load("tools/heartbeat.js");
-	if (!getScript("libs/private-server/tools/TownModeChecker.js")) { //载入线程 城镇地图类型查看
-		load("libs/private-server/tools/TownModeChecker.js"); //载入线程 城镇地图类型查看
-	}
 
 	while (!gameInfo) {
 		D2Bot.requestGameInfo();
@@ -441,14 +401,6 @@ function locationAction(location) {
 				break;
 			}
 
-			Messaging.sendToScript("libs/private-server/tools/TownModeChecker.js", "startChecking"); //让线程开始监听封包
-
-			while (!townModeChecking) { //等待线程成功开始监听封包
-				delay(50);
-			}
-
-			townModeChecking = false;
-
 			if (lastGameStatus === "pending") {
 				gameCount += 1;
 			}
@@ -492,9 +444,6 @@ function locationAction(location) {
 
 				if (StarterConfig.ResetCount && gameCount >= StarterConfig.ResetCount) {
 					gameCount = 1;
-					if (!deleteGameTownMode()) { //删除TownMode信息
-						throw new Error("Failed to delete GameTownMode.");
-					}
 					DataFile.updateStats("runs", gameCount);
 				}
 			}

@@ -326,6 +326,173 @@ Town.validChest = function (classid, x, y) {
     return true;
 };
 
+Town.compareLists = function (arr1, arr2) {
+    var i, j,
+        sameNo = 0;
+
+    for (i = 0; i < arr1.length; i++) {
+        for (j = 0; j < arr2.length; j++) {
+            if (arr1[i].x === arr2[j].x && arr1[i].y === arr2[j].y && arr1[i].classId === arr2[j].classId) {
+                sameNo++;
+            }
+        }
+    }
+    return sameNo;
+};
+
+Town.checkTownMode = function () {
+    var i, unit, objectList = [], sameNo, townMode, sameRate,
+        fireUnit, fire,
+        savedObjectList,
+        maxSameNo = 0,
+        filePath = "libs/private-server/data/TownModes.json",
+        townModes = JSON.parse(Misc.fileAction(filePath, 0));
+
+
+    if (me.act === 1) {
+        fireUnit = getPresetUnit(1, 2, 39);
+        fire = {
+            x: fireUnit.roomx * 5 + fireUnit.x,
+            y: fireUnit.roomy * 5 + fireUnit.y
+        };
+    }
+
+    unit = getUnit(2);
+    if (unit) {
+        objectList.push({
+            x: me.act === 1 ? unit.x - fire.x : unit.x,
+            y: me.act === 1 ? unit.y - fire.y : unit.y,
+            classId: unit.classid
+        })
+
+        do {
+            for (i = 0; i < objectList.length; i++) {
+                if (!(objectList[i].x === unit.x && objectList[i].y === unit.y && objectList[i].classid === unit.classid)) { //不同坐标即添加
+                    objectList.push({
+                        x: me.act === 1 ? unit.x - fire.x : unit.x,
+                        y: me.act === 1 ? unit.y - fire.y : unit.y,
+                        classId: unit.classid
+                    });
+                    break;
+                }
+            }
+        } while (unit.getNext())
+    }
+
+    for (i = 0; i < townModes["act" + me.act].length; i++) {
+        savedObjectList = townModes["act" + me.act][i];
+        sameNo = this.compareLists(objectList, savedObjectList);
+
+        if (sameNo > maxSameNo) {
+            maxSameNo = sameNo;
+            townMode = "type" + (i + 1);
+        }
+    }
+
+    sameRate = Math.round((maxSameNo / objectList.length) * 100) + "%";
+
+    print("TownMode: " + townMode + "  " + sameRate);
+
+    return townMode;
+};
+
+Town.initialize = function () {
+    //print("Initialize town " + me.act);
+
+    switch (me.act) {
+        case 1:
+            var fire,
+                wp = getPresetUnit(1, 2, 119),
+                fireUnit = getPresetUnit(1, 2, 39);
+
+            if (!fireUnit) {
+                return false;
+            }
+
+            fire = [fireUnit.roomx * 5 + fireUnit.x, fireUnit.roomy * 5 + fireUnit.y];
+
+            this.act[0].spot = {};
+            this.act[0].spot.stash = [fire[0] - 7, fire[1] - 12];
+            this.act[0].spot.warriv = [fire[0] - 5, fire[1] - 2];
+            this.act[0].spot.cain = [fire[0] + 6, fire[1] - 5];
+            this.act[0].spot[NPC.Kashya] = [fire[0] + 14, fire[1] - 4];
+            this.act[0].spot[NPC.Akara] = [fire[0] + 56, fire[1] - 30];
+            this.act[0].spot[NPC.Charsi] = [fire[0] - 39, fire[1] - 25];
+            this.act[0].spot[NPC.Gheed] = [fire[0] - 34, fire[1] + 36];
+            this.act[0].spot.portalspot = [fire[0] + 10, fire[1] + 18];
+            this.act[0].spot.waypoint = [wp.roomx * 5 + wp.x, wp.roomy * 5 + wp.y];
+            this.act[0].initialized = true;
+
+            break;
+        case 2:
+            this.act[1].spot = {};
+            this.act[1].spot[NPC.Fara] = [5124, 5082];
+            this.act[1].spot.cain = [5124, 5082];
+            this.act[1].spot[NPC.Lysander] = [5118, 5104];
+            this.act[1].spot[NPC.Greiz] = [5033, 5053];
+            this.act[1].spot[NPC.Elzix] = [5032, 5102];
+            this.act[1].spot.palace = [5088, 5153];
+            this.act[1].spot.sewers = [5221, 5181];
+            this.act[1].spot.meshif = [5205, 5058];
+            this.act[1].spot[NPC.Drognan] = [5097, 5035];
+            this.act[1].spot.atma = [5137, 5060];
+            this.act[1].spot.warriv = [5152, 5201];
+            this.act[1].spot.portalspot = [5168, 5060];
+            this.act[1].spot.stash = [5124, 5076];
+            this.act[1].spot.waypoint = [5070, 5083];
+            this.act[1].initialized = true;
+
+            break;
+        case 3:
+            this.act[2].spot = {};
+            this.act[2].spot.meshif = [5118, 5168];
+            this.act[2].spot[NPC.Hratli] = [5223, 5048, 5127, 5172];
+            this.act[2].spot[NPC.Ormus] = [5129, 5093];
+            this.act[2].spot[NPC.Asheara] = [5043, 5093];
+            this.act[2].spot[NPC.Alkor] = [5083, 5016];
+            this.act[2].spot.cain = [5148, 5066];
+            this.act[2].spot.stash = [5144, 5059];
+            this.act[2].spot.portalspot = [5150, 5063];
+            this.act[2].spot.waypoint = [5158, 5050];
+            this.act[2].initialized = true;
+
+            break;
+        case 4:
+            this.act[3].spot = {};
+            this.act[3].spot.cain = [5027, 5027];
+            this.act[3].spot[NPC.Halbu] = [5089, 5031];
+            this.act[3].spot[NPC.Tyrael] = [5027, 5027];
+            this.act[3].spot[NPC.Jamella] = [5088, 5054];
+            this.act[3].spot.stash = [5022, 5040];
+            this.act[3].spot.portalspot = [5045, 5042];
+            this.act[3].spot.waypoint = [5043, 5018];
+            this.act[3].initialized = true;
+
+            break;
+        case 5:
+            this.act[4].spot = {};
+            this.act[4].spot.portalspot = [5098, 5019];
+            this.act[4].spot.stash = [5129, 5061];
+            this.act[4].spot[NPC.Larzuk] = [5141, 5045];
+            this.act[4].spot[NPC.Malah] = [5078, 5029];
+            this.act[4].spot.cain = [5119, 5061];
+            this.act[4].spot[NPC["Qual-Kehk"]] = [5066, 5083];
+            this.act[4].spot[NPC.Anya] = [5112, 5120];
+            this.act[4].spot.portal = [5118, 5120];
+            this.act[4].spot.waypoint = [5113, 5068];
+            this.act[4].spot.nihlathak = [5071, 5111];
+            this.act[4].initialized = true;
+
+            break;
+    }
+
+    if (Town.existBarriers) {
+        Town.act[me.act - 1].townMode = this.checkTownMode();
+    }
+
+    return true;
+};
+
 Town.getPath = function (spot) {
     var i, typePathes,
         townMode = this.act[me.act - 1].townMode,
@@ -333,10 +500,9 @@ Town.getPath = function (spot) {
 
     print("From: " + Color.lgreen + mySpot + Color.white + ", To: " + Color.lgreen + spot);
 
-    do {
-        townMode = this.act[me.act - 1].townMode;
-        delay(100);
-    } while (!townMode);
+    if (!townMode) {
+        throw new Error("Cannot find townMode!");
+    }
 
     typePathes = this.pathes["act" + me.act][townMode];
     for (i = 0; i < typePathes.length; i++) {

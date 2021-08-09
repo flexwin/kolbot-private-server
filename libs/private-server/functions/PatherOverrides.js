@@ -53,18 +53,6 @@ Pather.useWaypoint = function useWaypoint(targetArea, check) {
                     this.moveToUnit(wp);
                 }
 
-                if (townTargetAreas.indexOf(targetArea) > -1 && !Town.act[townTargetAreas.indexOf(targetArea)].townMode) { //如果需要去城中且目标城镇不存在townMode,则监听townMode
-                    if (!getScript("libs/private-server/tools/TownModeChecker.js")) { //检查线程
-                        throw new Error("Checker is not running!");
-                    }
-
-                    Messaging.sendToScript("libs/private-server/tools/TownModeChecker.js", "startChecking"); //让线程开始监听封包
-
-                    while (!townModeChecking) { //等待线程成功开始监听封包
-                        delay(50);
-                    }
-                }
-
                 Misc.click(0, 0, wp);
 
                 tick = getTickCount();
@@ -260,7 +248,7 @@ Pather.usePortal = function (targetArea, owner, unit) {
     me.cancel();
 
     var i, tick, portal, useTK,
-        preArea = me.area, townTargetAreas = [1, 40, 75, 103, 109];
+        preArea = me.area;
 
     for (i = 0; i < 10; i += 1) {
         if (me.dead) {
@@ -274,17 +262,9 @@ Pather.usePortal = function (targetArea, owner, unit) {
         portal = unit ? copyUnit(unit) : this.getPortal(targetArea, owner);
 
         if (portal) {
-
-            //无论如何开始监听
-            Messaging.sendToScript("libs/private-server/tools/TownModeChecker.js", "startChecking"); //让线程开始监听封包
-
-            while (!townModeChecking) { //等待线程成功开始监听封包
-                delay(50);
-            }
-
             if (i === 0) {
                 //useTK = me.classid === 1 && me.getSkill(43, 1) && me.inTown && portal.getParent();
-                useTK = false; //（私服禁用TK portal）
+                useTK = false;
             }
 
             if (portal.area === me.area) {
@@ -325,11 +305,6 @@ Pather.usePortal = function (targetArea, owner, unit) {
 
             while (getTickCount() - tick < Math.max(Math.round((i + 1) * 1000 / (i / 5 + 1)), me.ping * 2)) {
                 if (me.area !== preArea) {
-                    if (townTargetAreas.indexOf(me.area) === -1) { //如果不是传送到城内，则停止监听
-                        townModeChecking = false;
-                        Messaging.sendToScript("libs/private-server/tools/TownModeChecker.js", "stopChecking"); //让线程停止监听封包
-                    }
-
                     delay(100);
 
                     return true;
