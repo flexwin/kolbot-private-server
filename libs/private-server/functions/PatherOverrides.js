@@ -205,7 +205,6 @@ Pather.moveToExit = function (targetArea, use, clearPath) {
                 if (use || i < areas.length - 1) {
                     switch (currExit.type) {
                         case 1: // walk through
-                            print("walk throgh");
                             targetRoom = this.getNearestRoom(areas[i]);
 
                             if (targetRoom) {
