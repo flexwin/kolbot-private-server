@@ -4,6 +4,16 @@
 *	@描述		用于制作城镇地图类型数据文件
 */
 
+function locationTimeout(time, location) {
+    var endtime = getTickCount() + time;
+
+    while (getLocation() === location && endtime > getTickCount()) {
+        delay(500);
+    }
+
+    return (getLocation() !== location);
+}
+
 function main() {
     // include("OOG.js");
     // include("json2.js");
@@ -34,7 +44,7 @@ function main() {
     D2Bot.init();
 
     var packetlist = [], //封包数组
-        ingame = false,
+        ingame = false, charName,
         findingDiffRoom = false;
 
     //按键事件触发函数
@@ -70,28 +80,113 @@ function main() {
         Messaging.sendToScript("tools/ToolsThread.js", "quit");
 
         while (!getLocation() === 1) {
-            delay(50);
-        }
-
-        delay(500);
-
-        while (!ControlAction.click(6, 533, 469, 120, 20)) { // Create
             delay(500);
         }
 
-        while (!getLocation() === 4) {
-            delay(50);
-        }
-
-        delay(500);
-
         //到了大厅后 随机建立房间
-        ControlAction.createGame(this.randomWord(true, 5, 10), "1", "Highest", false);
+        //ControlAction.createGame(this.randomWord(true, 5, 10), "1", "Highest", false);
 
         return true;
     };
 
+    this.createNextRoom = function (location) {
+        var info, control;
+        switch (location) {
+            case 1:
+            case 3:
+                if (!ControlAction.click(6, 533, 469, 120, 20)) { // Create
+                    break;
+                }
+
+                if (!locationTimeout(5000, location)) { // in case create button gets bugged
+                    if (!ControlAction.click(6, 652, 469, 120, 20)) { // Join
+                        break;
+                    }
+
+                    if (!ControlAction.click(6, 533, 469, 120, 20)) { // Create
+                        break;
+                    }
+                }
+
+                break;
+            case 4: // Create Game
+                D2Bot.updateStatus("Creating Game");
+
+                control = getControl(1, 657, 342, 27, 20);
+
+                delay(2000);
+                createGame(this.randomWord(true, 5, 10), "1");
+
+                break;
+            case 2: // Waiting In Line
+                D2Bot.updateStatus("Waiting...");
+                locationTimeout(1 * 1e3, location);
+                ControlAction.click(6, 433, 433, 96, 32);
+
+                break;
+            case 18: // splash
+                ControlAction.click();
+
+                break;
+            case 12: // char select
+            case 15: // new character (selected)
+            case 29: // new character (list)
+            case 42: // empty char screen
+                info = {
+                    charName: charName
+                };
+                if (ControlAction.findCharacter(info)) {
+                    ControlAction.loginCharacter(info);
+                }
+
+                break;
+            case 16: // Character Select - Please Wait popup
+                if (!locationTimeout(1 * 1e3, location)) {
+                    ControlAction.click(6, 351, 337, 96, 32);
+                }
+
+                break;
+            case 17: // Lobby - Lost Connection - just click okay, since we're toast anyway
+                delay(1000);
+                ControlAction.click(6, 351, 337, 96, 32);
+
+                break;
+            case 20: // Single Player - Select Difficulty
+                break;
+            case 21: // Main Menu - Connecting
+                if (!locationTimeout(1 * 1e3, location)) {
+                    ControlAction.click(6, 330, 416, 128, 35);
+                }
+
+                break;
+            case 23: // Character Select - Connecting
+                if (!locationTimeout(1 * 1e3, location)) {
+                    ControlAction.click(6, 33, 572, 128, 35);
+                }
+
+                break;
+            case 24: // Server Down - not much to do but wait..
+                break;
+            case 25: // Lobby - Please Wait
+                if (!locationTimeout(1 * 1e3, location)) {
+                    ControlAction.click(6, 351, 337, 96, 32);
+                }
+
+                break;
+            case 26: // game already exists
+                ControlAction.click(6, 533, 469, 120, 20);//create
+
+                break;
+        }
+    };
+
+
     this.checkRoom = function () {
+        if (!me.gameReady) {
+            return true;
+        }
+        //print("check");
+
         var i, objectList = [], sameNo, maxSameNo = 0, similarType, sameRate,
             obj, classId, fireUnit, fire, x, y,
             savedObjectList,
@@ -464,6 +559,9 @@ function main() {
             if (ingame) { //退出游戏了
                 ingame = false;
                 packetlist = []; //清空封包数组
+            }
+            if (findingDiffRoom) {
+                this.createNextRoom(getLocation());
             }
         }
 
