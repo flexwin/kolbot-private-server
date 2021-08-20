@@ -1,9 +1,6 @@
 //【回收药剂 [recycle]数值设为-2 [maxquantity]数值设为0】
 [name] == thawingpotion # # [recycle] == -2
 
-[name] == key # # [recycle] == 5
-[name] == antidotepotion # # [recycle] == 5
-
 //【非高品质回收 如要取消回收，则将recycle数值改为0】
 //###########单件############## 
 //对于单间的回收，[recycle]数值取1则为回收，取0则为不回收，请勿使用其他数值
