@@ -48,7 +48,7 @@ function main() {
 
 	if (getScript("D2BotMap.dbj") || getScript("D2BotMapPrivateServer.dbj")) { //加入私服入口文件判断
 		load("tools/mapthread.js");
-		load("tools/ToolsThread.js");
+		load("libs/private-server/tools/ToolsThread.js");
 
 		// addEventListener("scriptmsg", function (msg) {
 		// 	if (msg.indexOf("type") > -1) { //如果消息包含type(townMode)，则将townMode存入城镇地图信息
@@ -173,7 +173,7 @@ function main() {
 	addEventListener("copydata", this.copyDataEvent);
 	//addEventListener("scriptmsg", this.scriptEvent);  //转仓需要监听目标国度（receivedRealm），置前
 
-	load("tools/ToolsThread.js");
+	load("libs/private-server/tools/ToolsThread.js");
 
 	if (Config.TownCheck || Config.TownHP || Config.TownMP) {
 		load("libs/private-server/tools/TownChicken.js"); //仅增加townMode监听，不影响其他入口文件使用
