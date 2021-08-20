@@ -1,0 +1,254 @@
+//【回收药剂 [recycle]数值设为-2 [maxquantity]数值设为0】
+[name] == thawingpotion # # [recycle] == -2
+
+[name] == key # # [recycle] == 5
+[name] == antidotepotion # # [recycle] == 5
+
+//【非高品质回收 如要取消回收，则将recycle数值改为0】
+//###########单件############## 
+//对于单间的回收，[recycle]数值取1则为回收，取0则为不回收，请勿使用其他数值
+
+//艾斯屈塔的脾气
+[name] == EldritchOrb && [quality] == unique # !([SorceressSkills] == 3 && [passiveltngmastery] >= 20 && [energy] >= 30) # [recycle] == 1
+//乌鸦之霜
+[Type] == ring && [Quality] == Unique # [dexterity] >= 15 && [dexterity] <= 19 && [ToHit] >= 150 && [ToHit] < 249 # [recycle] == 1
+//旭日东升
+[Type] == amulet && [Quality] == Unique # [74] == 10 # [recycle] == 1
+//大君之怒
+[Type] == amulet && [Quality] == Unique # [IAS] == 20 && [41] == 35 # [recycle] == 1
+//眼球
+[Name] == SwirlingCrystal && [Quality] == Unique # # [recycle] == 1
+//泰坦的复仇
+[Name] == CeremonialJavelin && [Quality] == Unique && [Flag] != ethereal # !([EnhancedDamage] >= 200 && [lifeleech] >= 9) # [recycle] == 1
+[Name] == CeremonialJavelin && [Quality] == Unique && [Flag] == ethereal # !([EnhancedDamage] >= 200) # [recycle] == 1
+//侏儒
+[Name] == HierophantTrophy && [Quality] == Unique && [Flag] != ethereal # !([EnhancedDefense] >= 200) # [recycle] == 1
+//骨焰
+[Name] == SuccubusSkull && [Quality] == Unique # # [recycle] == 1
+//奥玛斯的长袍
+[Name] == DuskShroud && [Quality] == Unique && [Flag] != ethereal # !(([skillnova] >=3 || [skillchainlightning] >=3) && [passiveltngmastery]>=15) # [recycle] == 1
+[Name] == DuskShroud && [Quality] == Unique && [Flag] != ethereal # !([skillblizzard] >=3 && [passivecoldmastery] >=15) # [recycle] == 1
+[Name] == DuskShroud && [Quality] == Unique && [Flag] != ethereal # !([skillenchant] >=3 && [passivefiremastery] >=15) # [recycle] == 1
+//水上漂
+[Name] == SharkskinBoots && [Quality] == Unique && [Flag] != ethereal # !([enhanceddefense] >=200 && [maxhp] >=65) # [recycle] == 1
+//军帽
+[Name] == Shako && [Quality] == Unique # [defense] == 141 # [recycle] == 1
+//暴风之盾
+[Name] == Monarch && [Quality] == Unique # !([defense] ==148) # [recycle] == 1
+//诗寇蒂的愤怒
+[Name] == RussetArmor && [Quality] == Unique && [Flag] == ethereal # !([EnhancedDefense] >= 200) # [recycle] == 1
+//撒拉兰姆的使者
+[Name] == GildedShield && [Quality] == Unique # !([EnhancedDefense] >= 200) # [recycle] == 1
+//巨鹰爪
+[Name] == GreaterTalons && [Quality] == Unique && [Flag] == ethereal # !([enhanceddamage] >= 200 && [lifeleech] >= 9 // bartuc's cut-throat) # [recycle] == 1
+//狼头
+[Name] == TotemicMask && [Quality] == Unique # !([EnhancedDefense] >= 200) # [recycle] == 1
+//吸血鬼的凝视
+[Name] == GrimHelm && [Quality] == Unique # !([lifeleech] >=8 && [manaleech] >=8 && [normaldamagereduction] >=20 && [magicresist] >=15) # [recycle] == 1
+//岩石制动器
+[name] == Sallet && [quality] == unique # # [recycle] == 1
+//灵魂看守者
+[Name] == EarthSpirit && [Quality] == unique # # [recycle] == 1
+//女神之翼
+[Name] == WingedHelm && [Quality] == unique # # [recycle] == 1
+//盗贼皇冠
+[name] == grandcrown && [quality] == unique && [Flag] == ethereal # !([enhanceddefense] >= 200 && [lifeleech] >= 12 && [itemgoldbonus] >= 100)  # [recycle] == 1
+//死亡之刀
+[Name] == BerserkerAxe && [Quality] == Unique # # [recycle] == 1
+//都瑞尔的壳
+[Name] == Cuirass && [Quality] == Unique && [Flag] == ethereal # !([EnhancedDefense] >= 190) # [recycle] == 1
+//谢夫特斯坦布
+[Name] == MeshArmor && [Quality] == Unique && [Flag] == ethereal # !([EnhancedDefense] >= 210) # [recycle] == 1
+//鹰之号角
+[Name] == CrusaderBow && [Quality] == Unique # # [recycle] == 1
+//猎头人的荣耀
+[Name] == TrollNest && [Quality] == Unique # # [recycle] == 1
+//亚瑞特的面容
+[Name] == SlayerGuard && [Quality] == Unique # !([enhanceddefense] >=200 && [lifeleech]>=6) # [recycle] == 1
+//狼嚎
+[Name] == FuryVisor && [Quality] == set # # [recycle] == 1
+//吸血圣王之圈
+[Name] == VampirefangBelt && [Quality] == Unique # # [recycle] == 1
+//沙撒璧的鬼魂释放者
+[Name] == BalrogSkin && [Quality] == set # # [recycle] == 1
+//死神的丧钟
+[Name] == Thresher && [Quality] == Unique && [Flag] != ethereal  # # [recycle] == 1
+//安戴尔的全灵
+[Name] == SpiredHelm && [Quality] == set # # [recycle] == 1
+//泰比克的光荣
+[Name] == Ward && [Quality] == set # # [recycle] == 1
+//asn绿爪
+[Name] == ScissorsSuwayyah && [Quality] == set # # [recycle] == 1
+//骨髓行走
+[Name] == BoneweaveBoots && [quality] == unique && [flag] != ethereal # !([strength] >= 20 && [skillskeletonmastery] >= 2)  # [recycle] == 1
+//艾尔多的欺瞒
+[Name] == ShadowPlate && [Quality] == set # # [recycle] == 1
+//UGC
+//[Name] == Grandcharm && [Quality] == Unique # !([itemreducedprices] >= 15 && [itemmagicbonus] >= 40) # [maxquantity] == 1 && [recycle] == 1
+//斗士的祸根
+[name] == wirefleece && [quality] == unique && [flag] == ethereal # !([enhanceddefense] >= 200) # [recycle] == 1
+//卓古拉之握
+[name] == vampirebonegloves && [quality] == unique && [flag] != ethereal # !([strength] >= 15 && [lifeleech] >= 10) # [recycle] == 1
+//安达利尔的面貌
+[name] == demonhead && [quality] == unique # !([lifeleech] >= 10 && [strength] >= 30) # [recycle] == 1
+//蜘蛛之网
+[name] == spiderwebsash && [quality] == unique && [flag] != ethereal # !([enhanceddefense] >= 120) # [recycle] == 1
+//美杜沙的凝视
+[Name] == Aegis && [Quality] == Unique # # [recycle] == 1
+//死灵夜翔
+[Name] == GhostGlaive && [Quality] == Unique # # [recycle] == 1
+//钢铁面纱 或 非极品夜翼面纱
+[name] == spiredhelm && [quality] == unique # !([passivecoldmastery] >= 15 && [dexterity] >= 20) # [recycle] == 1
+//弑夫刃
+[name] == wardbow && [quality] == unique # !([enhanceddamage] >= 200 && [plusskillguidedarrow] >= 5) # [recycle] == 1
+//希梅斯特的掠夺
+[Name] == ChampionAxe && [Quality] == Unique # # [recycle] == 1
+//维而登戈的心结
+[name] == mithrilcoil && [quality] == unique && [flag] != ethereal # !([vitality] >= 40 && [damageresist] >= 15) # [recycle] == 1
+//龙鳞
+[Name] == ZakarumShield && [Quality] == Unique # # [recycle] == 1
+//鬼火投射者
+[Type] == ring && [Quality] == Unique # [itemabsorblightpercent] >= 10 && [itemabsorblightpercent] < 20 && [itemmagicbonus] >= 10 && [itemmagicbonus] < 20 # [recycle] == 1
+//海拉伯得的国度
+[Name] == ConquerorCrown && [Quality] == Unique # # [recycle] == 1
+//格瑞斯华尔德的救赎
+[name] == caduceus && [quality] == set # !([sockets] >= 3 && [enhanceddamage] >= 200) # [recycle] == 1
+//格瑞斯华尔德的勇气
+[name] == corona && [quality] == set # !([enhanceddefense] >= 55) # [recycle] == 1
+//ama绿权冠
+[Name] == Diadem && [Quality] == set # # [recycle] == 1
+//暴风尖塔
+[Name] == GiantThresher && [Quality] == Unique # # [recycle] == 1
+//盗墓者
+[name] == crypticaxe && [quality] == unique && [flag] == ethereal # !([sockets] >= 3) # [recycle] == 1
+//碎钢
+[name] == ogregauntlets && [quality] == unique # !([defense] >= 270 && [enhanceddamage] >= 50 && [strength] >= 20) # [recycle] == 1
+//巨骷髅
+[name] == bonevisage && [quality] == unique # !([sockets] >= 2 && [defense] >= 450 && [strength] >= 35) # [recycle] == 1
+//海王利维亚桑
+[name] == krakenshell && [quality] == unique # !([damageresist] >= 25 && [strength] >= 50) # [recycle] == 1
+//阿凯尼的荣耀
+[name] == balrogskin && [quality] == unique # !([itemallskills] >= 2 && [enhanceddefense] >= 180) # [recycle] == 1
+//铁柱
+[Name] == WarPike && [Quality] == Unique # # [recycle] == 1
+//不朽之王的灵魂牢笼
+[Name] == SacredArmor && [Quality] == set # # [recycle] == 1
+//格瑞斯华尔德荣耀
+[Name] == VortexShield && [Quality] == set # !([defense] >= 333) # [recycle] == 1
+//风之力
+[name] == hydrabow && [quality] == unique # !([manaleech] >= 8) # [recycle] == 1
+//碎脑锤 或 地覆
+[Name] == ThunderMaul && [Quality] == Unique # # [recycle] == 1
+//鬼火焰
+[Name] == LegendSpike && [Quality] == Unique # # [recycle] == 1
+//圣堂武士的力量 或 泰瑞尔的力量
+[name] == sacredarmor && [quality] == unique # !([strength] >= 30 && [defense] <= 1502) # [recycle] == 1
+//乌鸦之王
+[Name] == SkySpirit && [Quality] == Unique # # [recycle] == 1
+//行刑者之裁决
+[Name] == GloriousAxe && [Quality] == Unique # # [recycle] == 1
+//梅格之歌的教训
+[name] == archonstaff && [quality] == unique # !([passivefirepierce] >= 15 && [passiveltngpierce] >= 15 && [passivecoldpierce] >= 15) # [recycle] == 1
+
+//###########多件##############
+//对于每一套的回收，[recycle]数值需取大于等于2的不同正整数
+
+//泰克雷的战斗装备（鞋+项链） 项链不要去掉注释！
+[Name] == Boots && [Quality] == set # # [recycle] == 2
+[Type] == amulet && [Quality] == set # [normaldamagereduction] == 2 # [maxquantity] == 1 && [recycle] == 2 //只捡一个，鞋子少项链多
+//NEC绿头+绿腰带
+[Name] == BoneVisage && [Quality] == set # !([defense] == 257) # [recycle] == 3
+[Name] == TrollBelt && [Quality] == set # !([maxmana] == 50 && [defense] == 166) # [recycle] == 3
+//布尔凯索的孩子（大剑+小剑）
+[Name] == ColossusBlade && [Quality] == set # # [recycle] == 4
+[Name] == MythicalSword && [Quality] == set # # [recycle] == 4
+
+//----------------------------------------------------------------------------------------------------------------------------------------------------
+
+//【高品质回收】 把高品质单独列出，毕竟高品质和极品的也要捡取并留下
+
+//艾斯屈塔的脾气
+[name] == EldritchOrb && [quality] == unique # [SorceressSkills] == 3 && [passiveltngmastery] >= 20 && [energy] >= 30
+//乌鸦之霜
+[Type] == ring && [Quality] == Unique # [dexterity] >= 20 && [ToHit] >= 249
+//泰坦的复仇
+[Name] == CeremonialJavelin && [Quality] == Unique && [Flag] != ethereal # [EnhancedDamage] >= 200 && [lifeleech] >= 9
+[Name] == CeremonialJavelin && [Quality] == Unique && [Flag] == ethereal # [EnhancedDamage] >= 200
+//侏儒
+[Name] == HierophantTrophy && [Quality] == Unique && [Flag] != ethereal # [EnhancedDefense] >= 200
+//奥玛斯的长袍
+[Name] == DuskShroud && [Quality] == Unique && [Flag] != ethereal # ([skillnova] >=3 || [skillchainlightning] >=3) && [passiveltngmastery]>=15 
+[Name] == DuskShroud && [Quality] == Unique && [Flag] != ethereal # [skillblizzard] >=3 && [passivecoldmastery] >=15
+[Name] == DuskShroud && [Quality] == Unique && [Flag] != ethereal # [skillenchant] >=3 && [passivefiremastery] >=15
+//水上漂
+[Name] == SharkskinBoots && [Quality] == Unique && [Flag] != ethereal # [enhanceddefense] >=200 && [maxhp] >=65
+//军帽
+[Name] == Shako && [Quality] == Unique # [defense] ==141
+//暴风之盾
+[Name] == Monarch && [Quality] == Unique # [defense] ==148
+//诗寇蒂的愤怒
+[Name] == RussetArmor && [Quality] == Unique && [Flag] == ethereal # [EnhancedDefense] >= 200
+//撒拉兰姆的使者
+[Name] == GildedShield && [Quality] == Unique # [EnhancedDefense] >= 200
+//巨鹰爪
+[Name] == GreaterTalons && [Quality] == Unique && [Flag] == ethereal # [enhanceddamage] >= 200 && [lifeleech] >= 9 // bartuc's cut-throat
+//狼头
+[Name] == TotemicMask && [Quality] == Unique # [EnhancedDefense] >= 200
+//吸血鬼的凝视
+[Name] == GrimHelm && [Quality] == Unique # [lifeleech] >=8 && [manaleech] >=8 && [normaldamagereduction] >=20 && [magicresist] >=15
+//盗贼皇冠
+[name] == grandcrown && [quality] == unique && [Flag] == ethereal # [enhanceddefense] >= 200 && [lifeleech] >= 12 && [itemgoldbonus] >= 100 
+//都瑞尔的壳
+[Name] == Cuirass && [Quality] == Unique && [Flag] == ethereal # [EnhancedDefense] >= 190
+//谢夫特斯坦布
+[Name] == MeshArmor && [Quality] == Unique && [Flag] == ethereal # [EnhancedDefense] >= 210
+//亚瑞特的面容
+[Name] == SlayerGuard && [Quality] == Unique # [enhanceddefense] >=200 && [lifeleech]>=6
+//死神的丧钟
+[Name] == Thresher && [Quality] == Unique && [Flag] == ethereal 
+//骨髓行走
+[Name] == BoneweaveBoots && [quality] == unique && [flag] != ethereal # [strength] >= 20 && [skillskeletonmastery] >= 2 // marrowwalk
+//UGC
+//[Name] == Grandcharm && [Quality] == Unique # [itemreducedprices] >= 15 && [itemmagicbonus] >= 40 # [maxquantity] == 1
+//斗士的祸根
+[name] == wirefleece && [quality] == unique && [flag] == ethereal # [enhanceddefense] >= 200
+//卓古拉之握
+[name] == vampirebonegloves && [quality] == unique && [flag] != ethereal # [strength] >= 15 && [lifeleech] >= 10 // dracul's grasp
+//安达利尔的面貌
+[name] == demonhead && [quality] == unique # [lifeleech] >= 10 && [strength] >= 30 // andariel's visage
+//蜘蛛之网
+[name] == spiderwebsash && [quality] == unique && [flag] != ethereal # [enhanceddefense] >= 120 // arachnid mesh
+//夜翼面纱
+[name] == spiredhelm && [quality] == unique # [passivecoldmastery] >= 15 && [dexterity] >= 20 // nightwing's veil
+//弑夫刃
+[name] == wardbow && [quality] == unique # [enhanceddamage] >= 200 && [plusskillguidedarrow] >= 5 // widowmaker
+//维而登戈的心结
+[name] == mithrilcoil && [quality] == unique && [flag] != ethereal # [vitality] >= 40 && [damageresist] >= 15 // verdungo's hearty cord
+//鬼火投射者
+[Type] == ring && [Quality] == Unique # [144] >= 2 && ([itemabsorblightpercent] >= 20 || [itemmagicbonus] >= 20)
+//格瑞斯华尔德的救赎
+[name] == caduceus && [quality] == set # [sockets] >= 3 && [enhanceddamage] >= 200 // griswold's redemption
+//格瑞斯华尔德的勇气
+[name] == corona && [quality] == set # [enhanceddefense] >= 55 // griswold's valor
+//盗墓者
+[name] == crypticaxe && [quality] == unique && [flag] == ethereal # [sockets] >= 3 // tomb reaver
+//碎钢
+[name] == ogregauntlets && [quality] == unique # [defense] >= 270 && [enhanceddamage] >= 50 && [strength] >= 20 // steelrend
+//巨骷髅
+[name] == bonevisage && [quality] == unique # [sockets] >= 2 && [defense] >= 450 && [strength] >= 35 // giant skull
+//海王利维亚桑
+[name] == krakenshell && [quality] == unique # [damageresist] >= 25 && [strength] >= 50 // leviathan
+//阿凯尼的荣耀
+[name] == balrogskin && [quality] == unique # [itemallskills] >= 2 && [enhanceddefense] >= 180 // arkaine's valor
+//格瑞斯华尔德荣耀
+[Name] == VortexShield && [Quality] == set # [defense] >= 333
+//风之力
+[name] == hydrabow && [quality] == unique # [manaleech] >= 8 // windforce
+//圣堂武士的力量/泰瑞尔的力量
+[name] == sacredarmor && [quality] == unique # [strength] >= 30 && [defense] <= 1502 // tyrael's might
+//梅格之歌的教训
+[name] == archonstaff && [quality] == unique # [passivefirepierce] >= 15 && [passiveltngpierce] >= 15 && [passivecoldpierce] >= 15 //mang song's lesson
+
+//NEC绿头+绿腰带
+[Name] == BoneVisage && [Quality] == set # [defense] == 257
+[Name] == TrollBelt && [Quality] == set # [maxmana] == 50 && [defense] == 166
