@@ -367,7 +367,7 @@ Town.checkTownMode = function () {
 
         do {
             for (i = 0; i < objectList.length; i++) {
-                if (!(objectList[i].x === unit.x && objectList[i].y === unit.y && objectList[i].classid === unit.classid)) { //不同坐标即添加
+                if (!(objectList[i].x === unit.x && objectList[i].y === unit.y && objectList[i].classId === unit.classid)) { //不同坐标即添加
                     objectList.push({
                         x: me.act === 1 ? unit.x - fire.x : unit.x,
                         y: me.act === 1 ? unit.y - fire.y : unit.y,
