@@ -478,7 +478,7 @@ var Recycle = {
             return true;
         }
         //去shop买药
-        Town.initNPC("Shop", "buyRecyclePotions"); //此时已打开界面
+        Town.initNPC("Key", "buyRecyclePotions"); //此时已打开界面
         npc = getInteractedNPC();
         recyclePotion = this.getRecyclePotion(npc);
         //print(recyclePotion.classid);
