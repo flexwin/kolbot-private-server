@@ -352,7 +352,7 @@ function locationAction() {
 			D2Bot.updateStatus("Lobby");
 
 			if (!firstLogin) {
-				changeRealm(StarterConfig.MuleRealm);
+				changeRealm(StarterConfig.TargetRealm);
 				firstLogin = true;
 				break;
 			}
