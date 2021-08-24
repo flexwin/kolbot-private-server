@@ -238,7 +238,7 @@ function timer(tick) {
 */
 function dbjPause() {
 	var i, script,
-		scripts = ["D2BotLeadPrivateServer.dbj"];
+		scripts = ["D2BotFollowPrivateServer.dbj"];
 
 	for (i = 0; i < scripts.length; i += 1) {
 		script = getScript(scripts[i]);
