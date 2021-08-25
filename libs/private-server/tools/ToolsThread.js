@@ -29,7 +29,7 @@ include("common/Storage.js");
 include("common/Town.js");
 
 
-if (getScript("D2BotLeadPrivateServer.dbj") || getScript("D2BotFollowPrivateServer.dbj")) {
+if (getScript("D2BotLeadPrivateServer.dbj") || getScript("D2BotFollowPrivateServer.dbj") || getScript("D2BotMapPrivateServer.dbj")) {
 	if (!isIncluded("private-server/functions/Globals.js")) {
 		include("private-server/functions/Globals.js");
 		SetUp.include();

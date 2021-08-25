@@ -77,7 +77,7 @@ function main() {
     };
 
     this.getNextRoom = function () {
-        Messaging.sendToScript("tools/ToolsThread.js", "quit");
+        Messaging.sendToScript("libs/private-server/tools/ToolsThread.js", "quit");
 
         while (!getLocation() === 1) {
             delay(500);
