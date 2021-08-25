@@ -281,25 +281,11 @@ var Recycle = {
                         if (eval(list[i][0])) {
                             if (list[i][1].length > 0) {
                                 if (eval(list[i][1])) {
-                                    if (list[i][2] && list[i][2].MaxQuantity && !isNaN(list[i][2].MaxQuantity)) {
-                                        num = NTIP.CheckQuantityOwned(list[i][0], list[i][1]);
 
-                                        if (num < list[i][2].MaxQuantity) {
-                                            result = list[i][2].Recycle;
+                                    result = list[i][2].Recycle;
 
-                                            break;
-                                        } else {
-                                            if (item.getParent() && item.getParent().name === me.name && item.mode === 0 && num === list[i][2].MaxQuantity) { // attempt at inv fix for maxquantity
-                                                result = list[i][2].Recycle;
+                                    break;
 
-                                                break;
-                                            }
-                                        }
-                                    } else {
-                                        result = list[i][2].Recycle;
-
-                                        break;
-                                    }
                                 } else if (!identified && result === 0) {
                                     result = -1;
 
@@ -308,48 +294,20 @@ var Recycle = {
                                     }
                                 }
                             } else {
-                                if (list[i][2] && list[i][2].MaxQuantity && !isNaN(list[i][2].MaxQuantity)) {
-                                    num = NTIP.CheckQuantityOwned(list[i][0], null);
 
-                                    if (num < list[i][2].MaxQuantity) {
-                                        result = list[i][2].Recycle;
+                                result = list[i][2].Recycle;
 
-                                        break;
-                                    } else {
-                                        if (item.getParent() && item.getParent().name === me.name && item.mode === 0 && num === list[i][2].MaxQuantity) { // attempt at inv fix for maxquantity
-                                            result = list[i][2].Recycle;
+                                break;
 
-                                            break;
-                                        }
-                                    }
-                                } else {
-                                    result = list[i][2].Recycle;
-
-                                    break;
-                                }
                             }
                         }
                     } else if (list[i][1].length > 0) {
                         if (eval(list[i][1])) {
-                            if (list[i][2] && list[i][2].MaxQuantity && !isNaN(list[i][2].MaxQuantity)) {
-                                num = NTIP.CheckQuantityOwned(null, list[i][1]);
 
-                                if (num < list[i][2].MaxQuantity) {
-                                    result = list[i][2].Recycle;
+                            result = list[i][2].Recycle;
 
-                                    break;
-                                } else {
-                                    if (item.getParent() && item.getParent().name === me.name && item.mode === 0 && num === list[i][2].MaxQuantity) { // attempt at inv fix for maxquantity
-                                        result = list[i][2].Recycle1;
+                            break;
 
-                                        break;
-                                    }
-                                }
-                            } else {
-                                result = list[i][2].Recycle;
-
-                                break;
-                            }
                         } else if (!identified && result === 0) {
                             result = -1;
 
@@ -505,6 +463,7 @@ var Recycle = {
     },
 
     doRecycle: function () {
+        // Town.initNPC("CainID", "cainID");
         this.buildRecycleList();
         this.buyRecyclePotions();
 
@@ -535,6 +494,8 @@ var Recycle = {
 
             transmute();
 
+            delay(700 + me.ping);
+
             this.recycleItems.splice(i, 1);
             i -= 1;
 
@@ -548,6 +509,7 @@ var Recycle = {
                     switch (result.result) {
                         case 0:
                             Misc.itemLogger("Dropped", items[j], "doCubing");
+                            D2bot.printToConsole(JSON.stringify(items[j]));
                             items[j].drop();
 
                             break;
@@ -557,8 +519,14 @@ var Recycle = {
 
                             break;
                         case 5: // Crafting System
+                            Misc.itemLogger("Recycled got", items[j]);
+                            Misc.logItem("Recycled got", items[j], result.line);
                             CraftingSystem.update(items[j]);
 
+                            break;
+                        default:
+                            Misc.itemLogger("Recycled got", items[j]);
+                            Misc.logItem("Recycled got", items[j], result.line);
                             break;
                     }
                 }
@@ -597,6 +565,8 @@ var Recycle = {
 
             transmute();
 
+            delay(700 + me.ping);
+
             this.recycleItemSets.splice(i, 1);
             i -= 1;
 
@@ -620,8 +590,14 @@ var Recycle = {
 
                             break;
                         case 5: // Crafting System
+                            Misc.itemLogger("Recycled got", items[j]);
+                            Misc.logItem("Recycled got", items[j], result.line);
                             CraftingSystem.update(items[j]);
 
+                            break;
+                        default:
+                            Misc.itemLogger("Recycled got", items[j]);
+                            Misc.logItem("Recycled got", items[j], result.line);
                             break;
                     }
                 }
